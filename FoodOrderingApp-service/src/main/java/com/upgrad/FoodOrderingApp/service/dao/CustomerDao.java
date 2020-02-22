@@ -1,5 +1,6 @@
 package com.upgrad.FoodOrderingApp.service.dao;
 
+import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import org.springframework.stereotype.Repository;
 
@@ -37,5 +38,16 @@ public class CustomerDao {
         } catch (NoResultException nre) {
             return null;
         }
+    }
+
+    /**
+     * Saves the Customer Auth along with access token when ever logged in
+     *
+     * @param customerAuth The Auth entity which has generated access token
+     * @return The persisted Customer Auth Entity with id generated
+     */
+    public CustomerAuthEntity createAuthToken(CustomerAuthEntity customerAuth) {
+        entityManager.persist(customerAuth);
+        return customerAuth;
     }
 }
