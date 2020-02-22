@@ -1,15 +1,13 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
-import com.upgrad.FoodOrderingApp.api.model.LoginResponse;
-import com.upgrad.FoodOrderingApp.api.model.LogoutResponse;
-import com.upgrad.FoodOrderingApp.api.model.SignupCustomerRequest;
-import com.upgrad.FoodOrderingApp.api.model.SignupCustomerResponse;
+import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.business.CustomerService;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
+import com.upgrad.FoodOrderingApp.service.exception.UpdateCustomerException;
 import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -105,7 +103,7 @@ public class CustomerController {
      * Logout the Customer after validating the access token
      * Updates the logout at in the Database records and returns the uuid of the Customer
      *
-     * @param authorization The Bearer authorization token from he headers
+     * @param authorization The Bearer authorization token from the headers
      * @return The uuid of the Customer after updating the logout at in records
      * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
      */
@@ -118,6 +116,39 @@ public class CustomerController {
         LogoutResponse logoutResponse = new LogoutResponse();
         logoutResponse.id(customerAuth.getCustomer().getUuid()).message("LOGGED OUT SUCCESSFULLY");
         return new ResponseEntity<LogoutResponse>(logoutResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Updates the first name and last name provided by the customer after validating the Bearer authorization
+     * token with the Database records.
+     * Throw error message when the access token is invalid/expired/not present in Database
+     *
+     * @param authorization         The Bearer authorization token from the headers
+     * @param updateCustomerRequest The request object which has the first name and last name to be updated
+     * @return The uuid of the customer updated along with Success message
+     * @throws UpdateCustomerException      If the passed First Name is not valid as it is mandatory field
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     */
+    @RequestMapping(method = RequestMethod.PUT, path = "/customer",
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<UpdateCustomerResponse> updateCustomer(@RequestHeader("authorization") final String authorization,
+                                                                 @RequestBody UpdateCustomerRequest updateCustomerRequest)
+            throws UpdateCustomerException, AuthorizationFailedException {
+        if (FoodOrderingUtil.isInValid(updateCustomerRequest.getFirstName())) {
+            throw new UpdateCustomerException("UCR-002", "First name field should not be empty");
+        }
+        CustomerEntity customerToUpdate = customerService.getCustomer(decodeBearerToken(authorization));
+        customerToUpdate.setFirstName(updateCustomerRequest.getFirstName());
+        if (updateCustomerRequest.getLastName() != null && !updateCustomerRequest.getLastName().isEmpty()) {
+            customerToUpdate.setLastName(updateCustomerRequest.getLastName());
+        }
+        CustomerEntity updatedCustomer = customerService.updateCustomer(customerToUpdate);
+        UpdateCustomerResponse response = new UpdateCustomerResponse();
+        response.id(updatedCustomer.getUuid()).firstName(updatedCustomer.getFirstName()).lastName(updatedCustomer.getLastName())
+                .setStatus("CUSTOMER DETAILS UPDATED SUCCESSFULLY");
+
+        return new ResponseEntity<UpdateCustomerResponse>(response, HttpStatus.OK);
     }
 
     /**

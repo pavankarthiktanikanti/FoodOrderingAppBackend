@@ -41,6 +41,17 @@ public class CustomerDao {
     }
 
     /**
+     * Update the Customer Record with the updated first name or last name based on customer request
+     *
+     * @param customer The customer details to be updated to Databse
+     * @return the updated Customer Entity
+     */
+    public CustomerEntity updateCustomer(CustomerEntity customer) {
+        entityManager.merge(customer);
+        return customer;
+    }
+
+    /**
      * Saves the Customer Auth along with access token when ever logged in
      *
      * @param customerAuth The Auth entity which has generated access token

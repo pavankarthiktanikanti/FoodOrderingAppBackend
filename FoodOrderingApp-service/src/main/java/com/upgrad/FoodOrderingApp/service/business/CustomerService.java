@@ -129,6 +129,29 @@ public class CustomerService {
     }
 
     /**
+     * Retrieve the Customer Record based on the access token after validating the token
+     * Throw error message if the token is expired/invalid/not present in Database
+     *
+     * @param accessToken The jwt access token of the customer
+     * @return The Customer entity retrieved from the Database based on the access token
+     * @throws AuthorizationFailedException if the token is expired/invalid/not present in Database
+     */
+    public CustomerEntity getCustomer(String accessToken) throws AuthorizationFailedException {
+        CustomerAuthEntity customerAuth = validateCustomerAuthorization(accessToken);
+        return customerAuth.getCustomer();
+    }
+
+    /**
+     * Update the Customer's first name or last name based on the customer request
+     *
+     * @param customerToUpdate The Customer entity to be updated to Database
+     * @return The Updated Customer from Database
+     */
+    public CustomerEntity updateCustomer(CustomerEntity customerToUpdate) {
+        return customerDao.updateCustomer(customerToUpdate);
+    }
+
+    /**
      * Validate the access token if present in Database or not and if customer not logged out before
      * and Expiry of the token is still not reached
      * Error message is thrown based on the access token status and returns the Customer Auth Model after updating
@@ -156,6 +179,7 @@ public class CustomerService {
             }
             return customerAuth;
         } else {
+            // If the access token is not a valid string to validate
             throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
         }
     }
