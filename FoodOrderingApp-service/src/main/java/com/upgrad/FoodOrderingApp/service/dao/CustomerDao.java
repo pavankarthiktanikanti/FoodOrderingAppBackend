@@ -50,4 +50,29 @@ public class CustomerDao {
         entityManager.persist(customerAuth);
         return customerAuth;
     }
+
+    /**
+     * Retrieves the Customer Auth matched with the access token, otherwise return null
+     *
+     * @param accessToken The jwt access token of the customer
+     * @return The Customer Auth Record with the matched access token, return null if access token doesn't
+     * match with the Database records
+     */
+    public CustomerAuthEntity getCustomerAuthByAccessToken(String accessToken) {
+        try {
+            return entityManager.createNamedQuery("customerAuthByAccessToken", CustomerAuthEntity.class)
+                    .setParameter("accessToken", accessToken).getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
+    /**
+     * Update the Customer Auth record after setting logout time
+     *
+     * @param updatedCustomerAuth The Customer Auth Entity to be updated to Database
+     */
+    public void updateCustomerAuth(CustomerAuthEntity updatedCustomerAuth) {
+        entityManager.merge(updatedCustomerAuth);
+    }
 }

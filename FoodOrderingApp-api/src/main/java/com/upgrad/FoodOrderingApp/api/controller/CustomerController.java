@@ -1,12 +1,14 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.upgrad.FoodOrderingApp.api.model.LoginResponse;
+import com.upgrad.FoodOrderingApp.api.model.LogoutResponse;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerRequest;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerResponse;
 import com.upgrad.FoodOrderingApp.service.business.CustomerService;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +102,25 @@ public class CustomerController {
     }
 
     /**
+     * Logout the Customer after validating the access token
+     * Updates the logout at in the Database records and returns the uuid of the Customer
+     *
+     * @param authorization The Bearer authorization token from he headers
+     * @return The uuid of the Customer after updating the logout at in records
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     */
+    @RequestMapping(method = RequestMethod.POST, path = "/customer/logout",
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<LogoutResponse> logout(@RequestHeader("authorization") final String authorization)
+            throws AuthorizationFailedException {
+        CustomerAuthEntity customerAuth = customerService.logout(decodeBearerToken(authorization));
+        LogoutResponse logoutResponse = new LogoutResponse();
+        logoutResponse.id(customerAuth.getCustomer().getUuid()).message("LOGGED OUT SUCCESSFULLY");
+        return new ResponseEntity<LogoutResponse>(logoutResponse, HttpStatus.OK);
+    }
+
+    /**
      * Decode the Basic Authorization Token
      * Added this logic here, due to the constraint of Mocks for Service class in Test cases
      *
@@ -115,6 +136,28 @@ public class CustomerController {
             return decodedArray;
         } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             throw new AuthenticationFailedException("ATH-003", "Incorrect format of decoded customer name and password");
+        }
+    }
+
+    /**
+     * Decode the Bearer Authorization Token
+     *
+     * @param authorization The Bearer authorization Token from the headers
+     * @return The decoded access Token
+     * @throws AuthorizationFailedException If the authorization token is not in valid format (missing Bearer prefix)
+     *                                      throw an error message as not logged in
+     */
+    public String decodeBearerToken(String authorization) throws AuthorizationFailedException {
+        try {
+            String[] bearerToken = authorization.split(FoodOrderingUtil.BEARER_TOKEN);
+            if (bearerToken != null && bearerToken.length > 1) {
+                String accessToken = bearerToken[1];
+                return accessToken;
+            } else {
+                throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
         }
     }
 }

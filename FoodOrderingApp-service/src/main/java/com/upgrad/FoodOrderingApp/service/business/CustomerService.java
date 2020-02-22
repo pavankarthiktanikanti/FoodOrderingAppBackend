@@ -4,6 +4,7 @@ import com.upgrad.FoodOrderingApp.service.dao.CustomerDao;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
@@ -107,5 +109,72 @@ public class CustomerService {
             throw new AuthenticationFailedException("ATH-002", "Invalid Credentials");
         }
 
+    }
+
+    /**
+     * Validate the Customer access token and update the logout time in Database if valid
+     * Throw error message if the access token is not present in Database or invalid or expired
+     *
+     * @param accessToken The jwt access token of the Customer
+     * @return The Customer Auth record for the matched Customer
+     * @throws AuthorizationFailedException If the token is not present/invalid/expired
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CustomerAuthEntity logout(String accessToken) throws AuthorizationFailedException {
+        CustomerAuthEntity customerAuth = validateCustomerAuthorization(accessToken);
+        final ZonedDateTime logoutAt = ZonedDateTime.now();
+        customerAuth.setLogoutAt(logoutAt);
+        customerDao.updateCustomerAuth(customerAuth);
+        return customerAuth;
+    }
+
+    /**
+     * Validate the access token if present in Database or not and if customer not logged out before
+     * and Expiry of the token is still not reached
+     * Error message is thrown based on the access token status and returns the Customer Auth Model after updating
+     * the logout time in Database
+     *
+     * @param accessToken The jwt access token of the Customer
+     * @return The Customer Auth with the logout time updated in Database
+     * @throws AuthorizationFailedException If the token is not valid/not found in Database or expired
+     */
+    public CustomerAuthEntity validateCustomerAuthorization(String accessToken) throws AuthorizationFailedException {
+        if (accessToken != null) {
+            CustomerAuthEntity customerAuth = customerDao.getCustomerAuthByAccessToken(accessToken);
+            // Token is not matched with the database records
+            if (customerAuth == null) {
+                throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
+            }
+            // Customer Already Logged out
+            if (customerAuth.getLogoutAt() != null) {
+                throw new AuthorizationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
+            }
+
+            // Validating Session Expiry is with in 8 hours or not
+            if (!isUserSessionValid(customerAuth.getExpiresAt())) {
+                throw new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
+            }
+            return customerAuth;
+        } else {
+            throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
+        }
+    }
+
+    /**
+     * Validate the Session Expiry time if it is with in the limit of 8 hours and still in future time
+     * compared to current time
+     *
+     * @param expiryTime The Expiry time of the token in the Database
+     * @return true if the acess token expiry didn't reach compared with current time
+     */
+    public Boolean isUserSessionValid(ZonedDateTime expiryTime) {
+        if (expiryTime != null) {
+            Long timeDifference = ChronoUnit.MILLIS.between(ZonedDateTime.now(), expiryTime);
+            // Negative timeDifference indicates an expired access token,
+            // difference should be with in the limit, token will be expired after 8 hours
+            return (timeDifference >= 0 && timeDifference <= FoodOrderingUtil.EIGHT_HOURS_IN_MILLIS);
+        }
+        // Token expired or customer never signed in before(may also be the case of invalid token)
+        return false;
     }
 }

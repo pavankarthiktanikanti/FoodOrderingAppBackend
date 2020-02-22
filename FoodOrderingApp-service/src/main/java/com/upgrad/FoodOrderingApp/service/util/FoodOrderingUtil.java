@@ -4,7 +4,9 @@ import java.util.regex.Pattern;
 
 public class FoodOrderingUtil {
     public static final String BASIC_TOKEN = "Basic ";
+    public static final String BEARER_TOKEN = "Bearer ";
     public static final String COLON = ":";
+    public static final Long EIGHT_HOURS_IN_MILLIS = 8 * 60 * 60 * 1000L;
 
     /**
      * Checks if the input string is an invalid String (null or empty)
