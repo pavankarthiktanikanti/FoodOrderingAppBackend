@@ -65,15 +65,25 @@ public class CustomerController {
         return new ResponseEntity<SignupCustomerResponse>(signupCustomerResponse, HttpStatus.CREATED);
     }
 
+    /**
+     * Validates the Customer Credentials and logs in the Customer and returns the generated
+     * jwt token for the customer to accesses the apis further
+     *
+     * @param authorization The Basic Authorization token having the Credentials
+     * @return The Customer basic details along with the generated jwt token in header
+     * @throws AuthenticationFailedException If the authorization isn't valid or the credentials doesn't match with records
+     */
     @RequestMapping(method = RequestMethod.POST, path = "/customer/login",
             consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<LoginResponse> login(@RequestHeader("authorization") final String authorization)
             throws AuthenticationFailedException {
         String[] decodedText = decodeBasicAuthorization(authorization);
+        // If the authorization header doesn't have valid format, throw error message
         if (decodedText == null || decodedText.length < 1) {
             throw new AuthenticationFailedException("ATH-003", "Incorrect format of decoded customer name and password");
         }
+        // Authenticate the customer and generate the jwt access token for further access to apis
         CustomerAuthEntity customerAuth = customerService.authenticate(decodedText[0], decodedText[1]);
         CustomerEntity customer = customerAuth.getCustomer();
         LoginResponse loginResponse = new LoginResponse();
@@ -81,6 +91,7 @@ public class CustomerController {
                 .emailAddress(customer.getEmail()).contactNumber(customer.getContactNumber())
                 .message("LOGGED IN SUCCESSFULLY");
         List<String> header = new ArrayList<>();
+        // Set the generated access token in the response headers
         header.add("access-token");
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccessControlExposeHeaders(header);
@@ -88,6 +99,14 @@ public class CustomerController {
         return new ResponseEntity<LoginResponse>(loginResponse, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * Decode the Basic Authorization Token
+     * Added this logic here, due to the constraint of Mocks for Service class in Test cases
+     *
+     * @param authorization The Basic Authorization Token from the Headers
+     * @return The decoded array of contact number and password
+     * @throws AuthenticationFailedException If the authorization token is not in correct format
+     */
     private String[] decodeBasicAuthorization(final String authorization) throws AuthenticationFailedException {
         try {
             byte[] decode = Base64.getDecoder().decode(authorization.split(FoodOrderingUtil.BASIC_TOKEN)[1]);
