@@ -6,6 +6,7 @@ import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
+import com.upgrad.FoodOrderingApp.service.exception.UpdateCustomerException;
 import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -149,6 +150,36 @@ public class CustomerService {
      */
     public CustomerEntity updateCustomer(CustomerEntity customerToUpdate) {
         return customerDao.updateCustomer(customerToUpdate);
+    }
+
+    /**
+     * Validate the Customer access token and throw error message if the access token is not present
+     * in Database or invalid or expired
+     * Validate the old password with the one in the Database and update the new encrypted password to Database
+     * Validates if the new password is strong else throw error as Weak password
+     * If old password doesn't match with the records throw error as incorrect old password
+     *
+     * @param oldPassword      The old password of the Customer
+     * @param newPassword      The new password to be updated in the Database
+     * @param customerToUpdate The Customer Entity to be updated with new password
+     * @return The Customer Entity after updating the password
+     * @throws UpdateCustomerException If the new password is not String and old password doesn't match
+     */
+    public CustomerEntity updateCustomerPassword(String oldPassword, String newPassword, CustomerEntity customerToUpdate)
+            throws UpdateCustomerException {
+        if (!FoodOrderingUtil.isStrongPassword(newPassword)) {
+            throw new UpdateCustomerException("UCR-001", "Weak password!");
+        }
+        final String encryptedPassword = cryptographyProvider.encrypt(oldPassword, customerToUpdate.getSalt());
+        // Check if old encrypted password matches with Database records
+        if (encryptedPassword.equals(customerToUpdate.getPassword())) {
+            final String[] encryptedNewPassword = cryptographyProvider.encrypt(newPassword);
+            customerToUpdate.setPassword(encryptedNewPassword[0]);
+            customerToUpdate.setSalt(encryptedNewPassword[1]);
+            return customerDao.updateCustomer(customerToUpdate);
+        }
+        // If Old Password Doesn't match the password in database
+        throw new UpdateCustomerException("UCR-004", "Incorrect old password!");
     }
 
     /**

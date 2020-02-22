@@ -152,6 +152,35 @@ public class CustomerController {
     }
 
     /**
+     * Updates the Customer Password with the one provided by the customer after validating the Bearer authorization
+     * token with the Database records.
+     * Throw error message when the access token is invalid/expired/not present in Database
+     * Checks whether the old password matches with the one in Database before updating the new password
+     *
+     * @param authorization         The Bearer authorization token from the headers
+     * @param updatePasswordRequest The request object which has the old and new passwords
+     * @return The uuid of the Customer after updating the password
+     * @throws UpdateCustomerException      If the passed old/new password fields are empty or null
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     */
+    @RequestMapping(method = RequestMethod.PUT, path = "/customer/password",
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<UpdatePasswordResponse> updateCustomerPassword(@RequestHeader("authorization") final String authorization,
+                                                                         @RequestBody UpdatePasswordRequest updatePasswordRequest)
+            throws UpdateCustomerException, AuthorizationFailedException {
+        if (FoodOrderingUtil.isInValid(updatePasswordRequest.getOldPassword())
+                || FoodOrderingUtil.isInValid(updatePasswordRequest.getNewPassword())) {
+            throw new UpdateCustomerException("UCR-003", "No field should be empty");
+        }
+        CustomerEntity customerToUpdate = customerService.getCustomer(decodeBearerToken(authorization));
+        CustomerEntity updatedCustomer = customerService.updateCustomerPassword(updatePasswordRequest.getOldPassword(), updatePasswordRequest.getNewPassword(), customerToUpdate);
+        UpdatePasswordResponse response = new UpdatePasswordResponse();
+        response.id(updatedCustomer.getUuid()).status("CUSTOMER PASSWORD UPDATED SUCCESSFULLY");
+        return new ResponseEntity<UpdatePasswordResponse>(response, HttpStatus.OK);
+    }
+
+    /**
      * Decode the Basic Authorization Token
      * Added this logic here, due to the constraint of Mocks for Service class in Test cases
      *
