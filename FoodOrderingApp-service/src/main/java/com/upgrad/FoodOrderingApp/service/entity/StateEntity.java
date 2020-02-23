@@ -26,7 +26,7 @@ public class StateEntity {
 
     @Column(name = "state_name")
     @NotNull
-    @Size(max = 200)
+    @Size(max = 30)
     private String stateName;
 
     public Integer getId() {
