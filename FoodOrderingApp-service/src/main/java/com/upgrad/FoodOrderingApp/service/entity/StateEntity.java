@@ -7,7 +7,6 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "STATE")
 @NamedQueries({
-        @NamedQuery(name = "stateByStateUuid", query = "select s from StateEntity s where s.uuid = :uuid"),
         @NamedQuery(name = "allStates", query = "select s from StateEntity s")
 })
 

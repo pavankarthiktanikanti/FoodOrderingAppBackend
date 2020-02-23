@@ -14,9 +14,6 @@ public class AddressService {
     @Autowired
     private AddressDao addressDao;
 
-    @Autowired
-    private PasswordCryptographyProvider cryptographyProvider;
-
     /**
      * This will return all the states
      *
