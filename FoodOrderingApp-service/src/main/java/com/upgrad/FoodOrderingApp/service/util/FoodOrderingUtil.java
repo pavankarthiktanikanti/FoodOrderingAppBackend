@@ -1,5 +1,7 @@
 package com.upgrad.FoodOrderingApp.service.util;
 
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
+
 import java.util.regex.Pattern;
 
 public class FoodOrderingUtil {
@@ -62,5 +64,27 @@ public class FoodOrderingUtil {
         String regex = "(?=.*[A-Z])(?=.*\\d)(?=.*[#@$%&*!^])(.*){8,}";
         Pattern pattern = Pattern.compile(regex);
         return pattern.matcher(password).matches();
+    }
+
+    /**
+     * Decode the Bearer Authorization Token
+     *
+     * @param authorization The Bearer authorization Token from the headers
+     * @return The decoded access Token
+     * @throws AuthorizationFailedException If the authorization token is not in valid format (missing Bearer prefix)
+     *                                      throw an error message as not logged in
+     */
+    public static String decodeBearerToken(String authorization) throws AuthorizationFailedException {
+        try {
+            String[] bearerToken = authorization.split(FoodOrderingUtil.BEARER_TOKEN);
+            if (bearerToken != null && bearerToken.length > 1) {
+                String accessToken = bearerToken[1];
+                return accessToken;
+            } else {
+                throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
+        }
     }
 }
