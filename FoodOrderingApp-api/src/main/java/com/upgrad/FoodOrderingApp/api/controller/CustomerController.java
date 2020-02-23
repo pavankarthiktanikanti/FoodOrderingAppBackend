@@ -112,7 +112,7 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<LogoutResponse> logout(@RequestHeader("authorization") final String authorization)
             throws AuthorizationFailedException {
-        CustomerAuthEntity customerAuth = customerService.logout(decodeBearerToken(authorization));
+        CustomerAuthEntity customerAuth = customerService.logout(FoodOrderingUtil.decodeBearerToken(authorization));
         LogoutResponse logoutResponse = new LogoutResponse();
         logoutResponse.id(customerAuth.getCustomer().getUuid()).message("LOGGED OUT SUCCESSFULLY");
         return new ResponseEntity<LogoutResponse>(logoutResponse, HttpStatus.OK);
@@ -138,7 +138,7 @@ public class CustomerController {
         if (FoodOrderingUtil.isInValid(updateCustomerRequest.getFirstName())) {
             throw new UpdateCustomerException("UCR-002", "First name field should not be empty");
         }
-        CustomerEntity customerToUpdate = customerService.getCustomer(decodeBearerToken(authorization));
+        CustomerEntity customerToUpdate = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         customerToUpdate.setFirstName(updateCustomerRequest.getFirstName());
         if (updateCustomerRequest.getLastName() != null && !updateCustomerRequest.getLastName().isEmpty()) {
             customerToUpdate.setLastName(updateCustomerRequest.getLastName());
@@ -173,7 +173,7 @@ public class CustomerController {
                 || FoodOrderingUtil.isInValid(updatePasswordRequest.getNewPassword())) {
             throw new UpdateCustomerException("UCR-003", "No field should be empty");
         }
-        CustomerEntity customerToUpdate = customerService.getCustomer(decodeBearerToken(authorization));
+        CustomerEntity customerToUpdate = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         CustomerEntity updatedCustomer = customerService.updateCustomerPassword(updatePasswordRequest.getOldPassword(), updatePasswordRequest.getNewPassword(), customerToUpdate);
         UpdatePasswordResponse response = new UpdatePasswordResponse();
         response.id(updatedCustomer.getUuid()).status("CUSTOMER PASSWORD UPDATED SUCCESSFULLY");
@@ -196,28 +196,6 @@ public class CustomerController {
             return decodedArray;
         } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             throw new AuthenticationFailedException("ATH-003", "Incorrect format of decoded customer name and password");
-        }
-    }
-
-    /**
-     * Decode the Bearer Authorization Token
-     *
-     * @param authorization The Bearer authorization Token from the headers
-     * @return The decoded access Token
-     * @throws AuthorizationFailedException If the authorization token is not in valid format (missing Bearer prefix)
-     *                                      throw an error message as not logged in
-     */
-    public String decodeBearerToken(String authorization) throws AuthorizationFailedException {
-        try {
-            String[] bearerToken = authorization.split(FoodOrderingUtil.BEARER_TOKEN);
-            if (bearerToken != null && bearerToken.length > 1) {
-                String accessToken = bearerToken[1];
-                return accessToken;
-            } else {
-                throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
         }
     }
 }

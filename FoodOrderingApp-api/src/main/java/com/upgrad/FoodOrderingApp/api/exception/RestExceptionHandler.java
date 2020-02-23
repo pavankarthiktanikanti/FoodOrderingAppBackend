@@ -1,10 +1,7 @@
 package com.upgrad.FoodOrderingApp.api.exception;
 
 import com.upgrad.FoodOrderingApp.api.model.ErrorResponse;
-import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
-import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
-import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
-import com.upgrad.FoodOrderingApp.service.exception.UpdateCustomerException;
+import com.upgrad.FoodOrderingApp.service.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -71,6 +68,21 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorResponse> updateCustomerException(UpdateCustomerException exception, WebRequest request) {
         return new ResponseEntity<ErrorResponse>(
                 new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.BAD_REQUEST
+        );
+    }
+
+    /**
+     * Global Exception handler for coupon search Failures
+     * Handles the exception and sends back the customer/client a user friendly message along with HTTP Status code
+     *
+     * @param exception The Coupon Exception when the search doesn't yield results
+     * @param request   The web request information if any to be used while framing the response
+     * @return The Error Response consisting of the Http status code and an error message
+     */
+    @ExceptionHandler(CouponNotFoundException.class)
+    public ResponseEntity<ErrorResponse> couponNotFoundException(CouponNotFoundException exception, WebRequest request) {
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
         );
     }
 }
