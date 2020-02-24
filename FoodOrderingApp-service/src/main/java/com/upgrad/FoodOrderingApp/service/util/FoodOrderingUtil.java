@@ -87,4 +87,20 @@ public class FoodOrderingUtil {
             throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
         }
     }
+
+    /**
+     * Check for the valid pin code
+     * contains only digit
+     * length is 6
+     *
+     * @param pinCode The pincode provided by the customer
+     * @return true if it doesn't matches the expected pattern, true otherwise
+     */
+    public static Boolean isInvalidPinCode(String pinCode) {
+        // \b at the start and the end defines a word boundary so that it doesn't match words like text12, 9gag, 4chan et
+        // \d{6}+ allows only 6 number of digits
+        String regex = "(\\b\\d{6}+\\b)";
+        Pattern pattern = Pattern.compile(regex);
+        return !pattern.matcher(pinCode).matches();
+    }
 }
