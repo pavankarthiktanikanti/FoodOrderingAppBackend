@@ -46,7 +46,7 @@ public class AddressDao {
      * This will save the customer id and address id in the customer address table
      *
      * @param customerAddressEntity The customer id and address id that needs to be saved
-     * @return
+     * @return customer address entity that is saved in db
      */
     public CustomerAddressEntity saveCustomerAddress(CustomerAddressEntity customerAddressEntity) {
         entityManager.persist(customerAddressEntity);
@@ -54,7 +54,7 @@ public class AddressDao {
     }
 
     /**
-     * This will search for all the states in the db
+     * This will search for all the states in the data base
      *
      * @return List of State Entity
      */

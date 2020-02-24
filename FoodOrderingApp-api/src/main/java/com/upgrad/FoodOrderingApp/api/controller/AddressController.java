@@ -38,7 +38,7 @@ public class AddressController {
 
     /**
      * Saves the address after validating the Bearer authorization
-     * token with the Database records.
+     * token with the Database records
      * Throw error message when the access token is invalid/expired/not present in Database
      * Checks whether all the fields are present in address Request
      *
@@ -73,7 +73,6 @@ public class AddressController {
         address.setLocality(saveAddressRequest.getLocality());
         address.setCity(saveAddressRequest.getCity());
         address.setPincode(saveAddressRequest.getPincode());
-        address.setUuid(UUID.randomUUID().toString());
         AddressEntity updatedAddress = addressService.saveAddress(address, customer);
 
         //save the address in the customer address table

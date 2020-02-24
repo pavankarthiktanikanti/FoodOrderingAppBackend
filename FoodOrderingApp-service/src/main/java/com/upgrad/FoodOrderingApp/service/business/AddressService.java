@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AddressService {
@@ -26,24 +27,18 @@ public class AddressService {
      * Saved  Customer address in Database
      * Validate the Pincode Format and the state uuid with that of state uuid in state table
      *
-     * @param address The details of address to be saved in Database
-     * @return The saved Address entity Object
-     * @throws SaveAddressException when pin code is invalid,
-     * @throws AddressNotFoundException when no state found in state having same uuid
-     */
-    /**
-     * @param address
-     * @param customer
-     * @return
-     * @throws SaveAddressException
-     * @throws AddressNotFoundException
+     * @param address  The details of address to be saved in Database
+     * @param customer The details of customer who has logged in
+     * @return Address Entity which is saved in data base
+     * @throws SaveAddressException when pin code is invalid
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public AddressEntity saveAddress(AddressEntity address, CustomerEntity customer) throws SaveAddressException, AddressNotFoundException {
+    public AddressEntity saveAddress(AddressEntity address, CustomerEntity customer) throws SaveAddressException {
         // Check if the pincode entered is valid or not
         if (FoodOrderingUtil.isInvalidPinCode(address.getPincode())) {
             throw new SaveAddressException("SAR-002", "Invalid pincode");
         }
+        address.setUuid(UUID.randomUUID().toString());
         address.setActive(1);
         AddressEntity updatedAddress = addressDao.saveAddress(address);
 
@@ -55,10 +50,11 @@ public class AddressService {
     }
 
     /**
-     * This will check if there is any entry in the state table with same stateUUID
+     * This method will check if there is any entry in the state table with same stateUUID
      *
-     * @param stateUUID state UUID that is passed through Save Address Request
-     * @return State Entity matched with the uuid
+     * @param stateUUID state UUID that is passed through Save Address Reques
+     * @return the State Enitity having the same state uuid as passed as parameter
+     * @throws AddressNotFoundException will be thrown when no state is found
      */
     public StateEntity getStateByUUID(String stateUUID) throws AddressNotFoundException {
         StateEntity state = addressDao.getStateByStateUUID(stateUUID);
@@ -72,7 +68,7 @@ public class AddressService {
      * This will save the entry in the customer address table
      *
      * @param customerAddressEntity will be the customer id and address id
-     * @return
+     * @return Customer Address Entity that is saved in data base
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerAddressEntity saveCustomerAddress(CustomerAddressEntity customerAddressEntity) {
