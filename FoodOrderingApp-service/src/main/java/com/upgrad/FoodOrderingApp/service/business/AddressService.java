@@ -72,6 +72,15 @@ public class AddressService {
     }
 
     /**
+     * This will return the saved addresses in descending order of their saved time
+     *
+     * @return list of Address Entity
+     */
+    public List<AddressEntity> getAllAddress(CustomerEntity customer) {
+        return addressDao.getAllAddress(customer);
+    }
+
+    /**
      * This will return all the states
      *
      * @return List of all states
