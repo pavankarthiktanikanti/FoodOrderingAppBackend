@@ -38,16 +38,12 @@ public class OrderController {
      * @throws CouponNotFoundException      If the Coupon name is invalid or not found in Database
      */
     @RequestMapping(method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/order/coupon/{coupon_name}")
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = {"/order/coupon", "/order/coupon/{coupon_name}"})
     public ResponseEntity<OrderListCoupon> couponsByCouponName(@RequestHeader("authorization") final String authorization,
                                                                @PathVariable(name = "coupon_name", required = false) String couponName)
             throws AuthorizationFailedException, CouponNotFoundException {
         // Validate customer session
         customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
-        // If coupon name is empty
-        if (FoodOrderingUtil.isInValid(couponName)) {
-            throw new CouponNotFoundException("CPF-002", "Coupon name field should not be empty");
-        }
         CouponEntity coupon = orderService.getCouponByCouponName(couponName);
         OrderListCoupon orderListCoupon = new OrderListCoupon();
         orderListCoupon.id(UUID.fromString(coupon.getUuid())).couponName(coupon.getCouponName()).percent(coupon.getPercent());
