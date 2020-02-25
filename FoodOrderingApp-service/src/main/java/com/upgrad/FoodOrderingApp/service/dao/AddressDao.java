@@ -69,24 +69,9 @@ public class AddressDao {
      * @param addressId address Uuid that is passed in request
      * @return Address Entity that matching the address Uuid passed in request
      */
-    public AddressEntity getAddressByUUID(String addressId) {
+    public CustomerAddressEntity getAddressByUUID(String addressId) {
         try {
-            return entityManager.createNamedQuery("addressByUuid", AddressEntity.class).setParameter("uuid", addressId).getSingleResult();
-        } catch (NoResultException nre) {
-            return null;
-        }
-    }
-
-    /**
-     * This method is used to get the Customer Entity corresponding to the address uuid passed in request
-     *
-     * @param addressId address uuid passed in request
-     * @return Customer Entity corresponding to address uuid passed in request
-     */
-    public CustomerEntity getCustomerForAddress(String addressId) {
-        try {
-            return entityManager.createNamedQuery("customerForAddress", CustomerEntity.class).
-                    setParameter("addressId", addressId).getSingleResult();
+            return entityManager.createNamedQuery("addressByUuid", CustomerAddressEntity.class).setParameter("addressUUID", addressId).getSingleResult();
         } catch (NoResultException nre) {
             return null;
         }

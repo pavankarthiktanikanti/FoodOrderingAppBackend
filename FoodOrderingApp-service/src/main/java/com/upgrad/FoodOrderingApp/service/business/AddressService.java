@@ -92,14 +92,13 @@ public class AddressService {
      * @throws AuthorizationFailedException If customer is not the one who has created the address
      */
     public AddressEntity getAddressByUUID(String addressUuid, CustomerEntity loggedCustomer) throws AddressNotFoundException, AuthorizationFailedException {
-        AddressEntity address = addressDao.getAddressByUUID(addressUuid);
-        if (address == null) {
+        CustomerAddressEntity customerAddressEntity = addressDao.getAddressByUUID(addressUuid);
+        if (customerAddressEntity == null) {
             throw new AddressNotFoundException("ANF-003", "No address by this id");
         } else {
-            CustomerEntity customerForAddress = addressDao.getCustomerForAddress(addressUuid);
             //if the customer who has logged in is not same as the customer which belongs to the address to be deleted
-            if (customerForAddress != null && customerForAddress.getId() == loggedCustomer.getId()) {
-                return address;
+            if (customerAddressEntity.getCustomer() != null && customerAddressEntity.getCustomer().getId() == loggedCustomer.getId()) {
+                return customerAddressEntity.getAddress();
             } else {
                 throw new AuthorizationFailedException("ATHR-004", "You are not authorized to view/update/delete any one else's address");
 
@@ -109,14 +108,20 @@ public class AddressService {
 
     /**
      * This method is used to delete the address from data base
+     * If the value of variable active is 0 or null than the address will be deleted
+     * Otherwise the address Entity will be returned as is
      *
-     * @param addressEntity The Address Entity that needed to be deleted
-     * @return Address Entity that has been deleted
+     * @param addressEntity The Address Entity that needed to be deleted or archieved
+     * @return Address Entity that has been deleted or archieved
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public AddressEntity deleteAddress(AddressEntity addressEntity) {
-        AddressEntity deletedAddress = addressDao.deleteAddress(addressEntity);
-        return deletedAddress;
+        if (addressEntity.getActive() == 0 || addressEntity.getActive() == null) {
+            AddressEntity deletedAddress = addressDao.deleteAddress(addressEntity);
+            return deletedAddress;
+        } else {
+            return addressEntity;
+        }
     }
 
     /**

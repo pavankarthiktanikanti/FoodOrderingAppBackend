@@ -116,9 +116,11 @@ public class AddressController {
     }
 
     /**
-     * This method is used to delete an Address Entity from data base
-     * This will delete the address only if the address Uuid passed in request is present in data base
+     * This method is used to delete or archive an Address Entity from data base
+     * This will delete or archive the address only if the address Uuid passed in request is present in data base
      * and the address Uuid requested for deletion is created by logged in User
+     * Also if the value of active fields for Address Entity to be deleted is 0 than it will deleted
+     * otherwise it will be archived
      *
      * @param authorization The Bearer authorization token from the headers
      * @param addressUuid   The address Uuid passed in the request which needed to be deleted
@@ -127,15 +129,15 @@ public class AddressController {
      * @throws AddressNotFoundException     If the state uuid  is not present in state table
      */
     @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE,
-            path = "/address/{address_id}")
+            path = {"/address/{address_id}", "/address"})
     public ResponseEntity<DeleteAddressResponse> deleteAddress
-    (@RequestHeader("authorization") final String authorization, @PathVariable("address_id") String addressUuid)
+    (@RequestHeader("authorization") final String authorization, @PathVariable(name = "address_id", required = false) String addressUuid)
             throws AuthorizationFailedException, AddressNotFoundException {
-        CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         //checking if the address uuid is empty
         if (addressUuid.isEmpty()) {
             throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
         }
+        CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         //fetching address entity from database according to address Id
         AddressEntity addressToBeDeleted = addressService.getAddressByUUID(addressUuid, loggedCustomer);
         //checking if the user who has created the address is same as logged in customer
