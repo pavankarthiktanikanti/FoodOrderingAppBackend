@@ -2,6 +2,7 @@ package com.upgrad.FoodOrderingApp.service.dao;
 
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAddressEntity;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import org.springframework.stereotype.Repository;
 
@@ -51,6 +52,15 @@ public class AddressDao {
     public CustomerAddressEntity saveCustomerAddress(CustomerAddressEntity customerAddressEntity) {
         entityManager.persist(customerAddressEntity);
         return customerAddressEntity;
+    }
+
+    /**
+     * This will return the saved addresses in descending order of their saved time
+     *
+     * @return ist of Address Entity
+     */
+    public List<AddressEntity> getAllAddress(CustomerEntity customerEntity) {
+        return entityManager.createNamedQuery("allAddressesForCustomer", AddressEntity.class).setParameter("customerId", customerEntity.getId()).getResultList();
     }
 
     /**

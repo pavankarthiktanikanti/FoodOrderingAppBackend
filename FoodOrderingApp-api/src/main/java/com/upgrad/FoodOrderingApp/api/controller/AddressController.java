@@ -84,6 +84,38 @@ public class AddressController {
     }
 
     /**
+     * This method is used to get All the saved addresses in descending order of their saved time
+     * for a signed in user
+     *
+     * @param authorization The Bearer authorization token from the headers
+     * @return Address List of all the saved the addresses in the db
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     */
+    @RequestMapping(method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/address/customer")
+    public ResponseEntity<AddressListResponse> getAllAddress(@RequestHeader("authorization") final String authorization)
+            throws AuthorizationFailedException {
+        CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
+        List<AddressEntity> addresss = addressService.getAllAddress(customer);
+        List<AddressList> addressLists = new ArrayList<>();
+        //Check if any address is returned or not
+        if (addresss != null && !addresss.isEmpty()) {
+            for (AddressEntity address : addresss) {
+                AddressList addressList = new AddressList();
+                AddressListState addressListState = new AddressListState();
+                addressListState.id(UUID.fromString(address.getState().getUuid())).stateName(address.getState().getStateName());
+                addressList.id(UUID.fromString(address.getUuid())).flatBuildingName(address.getFlatBuilNo()).
+                        locality(address.getLocality()).city(address.getCity()).pincode(address.getPincode()).state(addressListState);
+                addressLists.add(addressList);
+
+            }
+        }
+        AddressListResponse addressListResponse = new AddressListResponse();
+        addressListResponse.setAddresses(addressLists);
+        return new ResponseEntity<AddressListResponse>(addressListResponse, HttpStatus.OK);
+    }
+
+    /**
      * This is used to get the list of all states
      * No authorization required for this endpoint
      *
