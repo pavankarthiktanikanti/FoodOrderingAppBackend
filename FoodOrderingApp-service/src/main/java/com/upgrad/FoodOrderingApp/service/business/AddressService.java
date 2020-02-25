@@ -42,10 +42,6 @@ public class AddressService {
         address.setActive(1);
         AddressEntity updatedAddress = addressDao.saveAddress(address);
 
-        CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
-        customerAddressEntity.setCustomer(customer);
-        customerAddressEntity.setAddress(updatedAddress);
-
         return address;
     }
 
