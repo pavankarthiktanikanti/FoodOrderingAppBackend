@@ -18,17 +18,23 @@ public class StateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @Column(name = "uuid", unique = true)
     @NotNull
     @Size(max = 200)
     private String uuid;
 
-
     @Column(name = "state_name")
     @NotNull
     @Size(max = 30)
     private String stateName;
+
+    public StateEntity() {
+    }
+
+    public StateEntity(@NotNull @Size(max = 200) String uuid, @NotNull @Size(max = 30) String stateName) {
+        this.uuid = uuid;
+        this.stateName = stateName;
+    }
 
     public Integer getId() {
         return id;
