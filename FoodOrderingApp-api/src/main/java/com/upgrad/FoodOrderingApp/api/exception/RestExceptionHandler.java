@@ -57,6 +57,36 @@ public class RestExceptionHandler {
     }
 
     /**
+     * Global Exception handler for Save Address Failure
+     * Handles the exception and sends back the customer/client a user friendly message along with HTTP Status code
+     *
+     * @param exception The Save Address Exception occurred in the application
+     * @param request   The web request information if any to be used while framing the response
+     * @return The Error Response consisting of the Http status code and an error message
+     */
+    @ExceptionHandler(SaveAddressException.class)
+    public ResponseEntity<ErrorResponse> saveAddressException(SaveAddressException exception, WebRequest request) {
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.BAD_REQUEST
+        );
+    }
+
+    /**
+     * Global Exception handler for  Address Not Found Exception
+     * Handles the exception and sends back the customer/client a user friendly message along with HTTP Status code
+     *
+     * @param exception The  Address Not Found Exception occurred in the application
+     * @param request   The web request information if any to be used while framing the response
+     * @return The Error Response consisting of the Http status code and an error message
+     */
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ErrorResponse> addressNotFoundException(AddressNotFoundException exception, WebRequest request) {
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+        );
+    }
+
+    /**
      * Global Exception handler for update Customer Failures when updating name or password
      * Handles the exception and sends back the customer/client a user friendly message along with HTTP Status code
      *
@@ -81,6 +111,21 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler(CouponNotFoundException.class)
     public ResponseEntity<ErrorResponse> couponNotFoundException(CouponNotFoundException exception, WebRequest request) {
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+        );
+    }
+
+    /**
+     * Global Exception handler for category search Failures
+     * Handles the exception and sends back the customer/client a user friendly message along with HTTP Status code
+     *
+     * @param exception The Category Not Found Exception when there is no match for the uuid
+     * @param request   The web request information if any to be used while framing the response
+     * @return The Error Response consisting of the Http status code and an error message
+     */
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> categoryNotFoundException(CategoryNotFoundException exception, WebRequest request) {
         return new ResponseEntity<ErrorResponse>(
                 new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
         );
