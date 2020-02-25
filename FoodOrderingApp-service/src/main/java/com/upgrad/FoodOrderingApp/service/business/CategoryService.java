@@ -4,6 +4,8 @@ import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.RestaurantCategoryDao;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantCategoryEntity;
+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
+import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,5 +45,26 @@ public class CategoryService {
             });
         }
         return categories;
+    }
+
+    /**
+     * Retrieves the Category details based on the category uuid
+     * Throws error message if in case there is no match found with the uuid in Database
+     *
+     * @param categoryUUID The uuid of the category to be retrieved
+     * @return The Category will all item details under it from the Database
+     * @throws CategoryNotFoundException If the uuid passed is empty or not found in Database
+     */
+    public CategoryEntity getCategoryById(String categoryUUID) throws CategoryNotFoundException {
+        // If uuid passed is empty or null
+        if (FoodOrderingUtil.isInValid(categoryUUID)) {
+            throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
+        }
+        CategoryEntity category = categoryDao.getCategoryByUUID(categoryUUID);
+        // No match found in the Database for the uuid
+        if (category == null) {
+            throw new CategoryNotFoundException("CNF-002", "No category by this id");
+        }
+        return category;
     }
 }
