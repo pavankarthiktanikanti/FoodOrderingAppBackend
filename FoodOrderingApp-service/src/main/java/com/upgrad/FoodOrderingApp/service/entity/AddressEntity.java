@@ -1,5 +1,6 @@
 package com.upgrad.FoodOrderingApp.service.entity;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -16,30 +17,25 @@ public class AddressEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @Column(name = "uuid", unique = true)
     @NotNull
     @Size(max = 200)
     private String uuid;
-
 
     @Column(name = "flat_buil_Number")
     @NotNull
     @Size(max = 255)
     private String flatBuilNo;
 
-
     @Column(name = "locality")
     @NotNull
     @Size(max = 200)
     private String locality;
 
-
     @Column(name = "city")
     @NotNull
     @Size(max = 200)
     private String city;
-
 
     @Column(name = "pincode")
     @NotNull
@@ -52,10 +48,23 @@ public class AddressEntity {
     @NotNull
     private StateEntity state;
 
-
     @Column(name = "active")
+    @ColumnDefault("1")
     private Integer active;
 
+    public AddressEntity() {
+    }
+
+    public AddressEntity(@NotNull @Size(max = 200) String uuid, @NotNull @Size(max = 255) String flatBuilNo,
+                         @NotNull @Size(max = 200) String locality, @NotNull @Size(max = 200) String city,
+                         @NotNull @Size(max = 200) String pincode, @NotNull StateEntity state) {
+        this.uuid = uuid;
+        this.flatBuilNo = flatBuilNo;
+        this.locality = locality;
+        this.city = city;
+        this.pincode = pincode;
+        this.state = state;
+    }
 
     public Integer getId() {
         return id;
@@ -64,7 +73,6 @@ public class AddressEntity {
     public void setId(Integer id) {
         this.id = id;
     }
-
 
     public String getLocality() {
         return locality;
