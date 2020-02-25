@@ -115,4 +115,19 @@ public class RestExceptionHandler {
                 new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
         );
     }
+
+    /**
+     * Global Exception handler for category search Failures
+     * Handles the exception and sends back the customer/client a user friendly message along with HTTP Status code
+     *
+     * @param exception The Category Not Found Exception when there is no match for the uuid
+     * @param request   The web request information if any to be used while framing the response
+     * @return The Error Response consisting of the Http status code and an error message
+     */
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> categoryNotFoundException(CategoryNotFoundException exception, WebRequest request) {
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+        );
+    }
 }
