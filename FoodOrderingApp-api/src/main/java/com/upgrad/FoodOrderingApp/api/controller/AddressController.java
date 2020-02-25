@@ -1,10 +1,7 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
 
-import com.upgrad.FoodOrderingApp.api.model.SaveAddressRequest;
-import com.upgrad.FoodOrderingApp.api.model.SaveAddressResponse;
-import com.upgrad.FoodOrderingApp.api.model.StatesList;
-import com.upgrad.FoodOrderingApp.api.model.StatesListResponse;
+import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.business.AddressService;
 import com.upgrad.FoodOrderingApp.service.business.CustomerService;
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
@@ -69,7 +66,7 @@ public class AddressController {
         final AddressEntity address = new AddressEntity();
 
         address.setState(state);
-        address.setFlat_building_name(saveAddressRequest.getFlatBuildingName());
+        address.setFlatBuilNo(saveAddressRequest.getFlatBuildingName());
         address.setLocality(saveAddressRequest.getLocality());
         address.setCity(saveAddressRequest.getCity());
         address.setPincode(saveAddressRequest.getPincode());
