@@ -98,11 +98,11 @@ public class AddressEntity {
         this.uuid = uuid;
     }
 
-    public String getFlatBuilNo() {
+    public String getFlatBuildNo() {
         return flatBuildNo;
     }
 
-    public void setFlatBuilNo(String flat_building_name) {
+    public void setFlatBuildNo(String flatBuildNo) {
         this.flatBuildNo = flatBuildNo;
     }
 
