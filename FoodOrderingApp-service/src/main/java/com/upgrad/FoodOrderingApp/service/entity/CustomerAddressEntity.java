@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "CUSTOMER_ADDRESS")
-@NamedQuery(name = "allAddressesForCustomer", query = "select ca.address from CustomerAddressEntity ca where ca.customer.id = :customerId")
+@NamedQuery(name = "allAddressesForCustomer", query = "select ca.address from CustomerAddressEntity ca where ca.customer.id = :customerId order by ca.id desc")
 public class CustomerAddressEntity {
 
     @Id
