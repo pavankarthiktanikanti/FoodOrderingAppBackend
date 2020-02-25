@@ -10,7 +10,6 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "ADDRESS")
-@NamedQuery(name = "allAddress", query = "select a from AddressEntity a where a.id in :id order by  a.id desc ")
 public class AddressEntity {
 
     @Id

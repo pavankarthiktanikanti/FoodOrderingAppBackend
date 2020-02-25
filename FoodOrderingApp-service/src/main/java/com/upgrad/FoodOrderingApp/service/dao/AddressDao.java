@@ -60,10 +60,7 @@ public class AddressDao {
      * @return ist of Address Entity
      */
     public List<AddressEntity> getAllAddress(CustomerEntity customerEntity) {
-        //will first fetch the list of all address Id's for the signed in customer
-        List addressIds = entityManager.createNamedQuery("allAddressIdForCustomer").
-                setParameter("customer", customerEntity).getResultList();
-        return entityManager.createNamedQuery("allAddress", AddressEntity.class).setParameter("id", addressIds).getResultList();
+        return entityManager.createNamedQuery("allAddressesForCustomer", AddressEntity.class).setParameter("customerId", customerEntity.getId()).getResultList();
     }
 
     /**
