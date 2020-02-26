@@ -64,6 +64,31 @@ public class AddressDao {
     }
 
     /**
+     * This method is used to get the Address Entity matching the address Uuid passed in request
+     *
+     * @param addressId address Uuid that is passed in request
+     * @return Address Entity that matching the address Uuid passed in request
+     */
+    public CustomerAddressEntity getAddressByUUID(String addressId) {
+        try {
+            return entityManager.createNamedQuery("addressByUuid", CustomerAddressEntity.class).setParameter("addressUUID", addressId).getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
+    /**
+     * This method is used to delete Address Entity fom database
+     *
+     * @param addressEntity Address Entity that needed to be deleted
+     * @return Address Entity which is deleted
+     */
+    public AddressEntity deleteAddress(AddressEntity addressEntity) {
+        entityManager.remove(addressEntity);
+        return addressEntity;
+    }
+
+    /**
      * This will search for all the states in the data base
      *
      * @return List of State Entity
