@@ -115,4 +115,18 @@ public class RestExceptionHandler {
                 new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
         );
     }
+
+    /**
+     * Global Exception Handler for Restaurant Not Found
+     *
+     * @param exception The Restaurant Not Found when restaurant name field entered by the customer is empty
+     * @param request   The web request information if any to be used while framing the response
+     * @return The Error Response consisting of the Http status code and an error message
+     */
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    public ResponseEntity<ErrorResponse> restaurantNotFoundException(RestaurantNotFoundException exception, WebRequest request) {
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+        );
+    }
 }

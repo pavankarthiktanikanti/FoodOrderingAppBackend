@@ -9,19 +9,18 @@ import com.upgrad.FoodOrderingApp.service.business.RestaurantService;
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
+import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 
 @CrossOrigin
 @RestController
@@ -44,6 +43,31 @@ public class RestaurantController {
     public ResponseEntity<RestaurantListResponse> getAllRestaurants() {
         // Read restaurants ordered by the ratings of each restaurant
         List<RestaurantEntity> restaurantEntityList = restaurantService.restaurantsByRating();
+        if (restaurantEntityList != null) {
+            // For each restaurant, retrieve the list of categories
+            for (RestaurantEntity restaurant : restaurantEntityList) {
+                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
+            }
+        }
+        List<RestaurantList> restaurantList = populateRestaurantList(restaurantEntityList);
+        RestaurantListResponse response = new RestaurantListResponse();
+        response.setRestaurants(restaurantList);
+        return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
+    }
+
+    /**
+     * This method is used to find the restaurant List partially matching the restaurant name passed in request
+     * Also the name searched is not be case sensitive
+     *
+     * @param restaurantName The restaurant name field send in the resquest
+     * @return List of all restraunt partially matching the name passed in alphabetic order of restraunt name
+     * @throws RestaurantNotFoundException If restaurant name field entered by the customer is empty
+     */
+    @RequestMapping(method = RequestMethod.GET, path = {"/restaurant/name/{reastaurant_name}", "/restaurant/name"},
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantListResponse> restaurantsByName(@PathVariable(name = "reastaurant_name", required = false)
+                                                                            String restaurantName) throws RestaurantNotFoundException {
+        List<RestaurantEntity> restaurantEntityList = restaurantService.restaurantsByName(restaurantName);
         if (restaurantEntityList != null) {
             // For each restaurant, retrieve the list of categories
             for (RestaurantEntity restaurant : restaurantEntityList) {

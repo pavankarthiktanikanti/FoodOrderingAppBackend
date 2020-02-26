@@ -21,4 +21,16 @@ public class RestaurantDao {
     public List<RestaurantEntity> restaurantsByRating() {
         return entityManager.createNamedQuery("restaurantsByRating", RestaurantEntity.class).getResultList();
     }
+
+    /**
+     * Retrives the list of all the Restaurants where the name field entered by the customer is partially matching
+     * Also the name searched is not be case sensitive
+     *
+     * @param likeRestaurantName concatinated restaurant name %restaurantName%
+     * @return list of Restaurant Entity where the name field entered by the customer is partially matching
+     */
+    public List<RestaurantEntity> restaurantsByName(String likeRestaurantName) {
+        return entityManager.createNamedQuery("restaurantsByName", RestaurantEntity.class).
+                setParameter("likeRestaurantName", likeRestaurantName).getResultList();
+    }
 }

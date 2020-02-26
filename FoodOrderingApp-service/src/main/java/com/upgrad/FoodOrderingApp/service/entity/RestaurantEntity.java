@@ -12,7 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "RESTAURANT")
 @NamedQueries({
-        @NamedQuery(name = "restaurantsByRating", query = "select r from RestaurantEntity r order by r.customerRating desc")
+        @NamedQuery(name = "restaurantsByRating", query = "select r from RestaurantEntity r order by r.customerRating desc"),
+        @NamedQuery(name = "restaurantsByName", query = "select r from  RestaurantEntity r where upper(r.restaurantName)  like upper(:likeRestaurantName) order by r.restaurantName asc ")
 })
 public class RestaurantEntity {
 
