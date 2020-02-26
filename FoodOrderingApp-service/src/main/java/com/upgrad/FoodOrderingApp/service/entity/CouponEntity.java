@@ -7,7 +7,8 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "COUPON")
 @NamedQueries({
-        @NamedQuery(name = "couponByCouponName", query = "select c from CouponEntity c where c.couponName = :couponName")
+        @NamedQuery(name = "couponByCouponName", query = "select c from CouponEntity c where c.couponName = :couponName"),
+        @NamedQuery(name = "couponByUUID", query = "select c from CouponEntity c where c.uuid = :couponUUID")
 })
 public class CouponEntity {
 

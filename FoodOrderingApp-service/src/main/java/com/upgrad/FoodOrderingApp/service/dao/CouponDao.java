@@ -33,4 +33,18 @@ public class CouponDao {
             return null;
         }
     }
+
+    /**
+     * Retrieves the Coupon from the database by matching the uuid of coupon
+     *
+     * @param couponUUID The uuid of the Coupon to retrieve
+     * @return The Coupon Entity with the details populated if matched, null otherwise
+     */
+    public CouponEntity getCouponByUUID(String couponUUID) {
+        try {
+            return entityManager.createNamedQuery("couponByUUID", CouponEntity.class).setParameter("couponUUID", couponUUID).getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
 }
