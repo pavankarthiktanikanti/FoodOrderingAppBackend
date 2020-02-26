@@ -116,10 +116,12 @@ public class AddressService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public AddressEntity deleteAddress(AddressEntity addressEntity) {
-        if (addressEntity.getActive() == 0 || addressEntity.getActive() == null) {
+        // active 1 indicates it is not linked to any order, so it can be deleted
+        if (addressEntity.getActive() == 1) {
             AddressEntity deletedAddress = addressDao.deleteAddress(addressEntity);
             return deletedAddress;
         } else {
+            // active other than 1 say 0 indicates it is linked to an order and archived, so no delete happens
             return addressEntity;
         }
     }
