@@ -48,7 +48,7 @@ public class RestaurantEntity {
     @Column(name = "number_of_customers_rated")
     @NotNull
     @ColumnDefault("0")
-    private Integer numberCustomersRated;
+    private Integer numberCustomersRated = 0;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

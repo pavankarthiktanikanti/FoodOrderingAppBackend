@@ -7,6 +7,7 @@ import com.upgrad.FoodOrderingApp.service.entity.CustomerAddressEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import com.upgrad.FoodOrderingApp.service.exception.AddressNotFoundException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
 import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,60 @@ public class AddressService {
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerAddressEntity saveCustomerAddress(CustomerAddressEntity customerAddressEntity) {
         return addressDao.saveCustomerAddress(customerAddressEntity);
+    }
+
+    /**
+     * This will return the saved addresses in descending order of their saved time
+     *
+     * @return list of Address Entity
+     */
+    public List<AddressEntity> getAllAddress(CustomerEntity customer) {
+        return addressDao.getAllAddress(customer);
+    }
+
+
+    /**
+     * This method is used to get the Address Entity from data base which needed to be deleted
+     *
+     * @param addressUuid    The address Uuid passed as request that needs to be deleted
+     * @param loggedCustomer Customer Entity who has logged in
+     * @return Address Entity that needed to be deleted
+     * @throws AddressNotFoundException     If no address is present in db matching address Uuid passed as request
+     * @throws AuthorizationFailedException If customer is not the one who has created the address
+     */
+    public AddressEntity getAddressByUUID(String addressUuid, CustomerEntity loggedCustomer) throws AddressNotFoundException, AuthorizationFailedException {
+        CustomerAddressEntity customerAddressEntity = addressDao.getAddressByUUID(addressUuid);
+        if (customerAddressEntity == null) {
+            throw new AddressNotFoundException("ANF-003", "No address by this id");
+        } else {
+            //if the customer who has logged in is not same as the customer which belongs to the address to be deleted
+            if (customerAddressEntity.getCustomer() != null && customerAddressEntity.getCustomer().getId() == loggedCustomer.getId()) {
+                return customerAddressEntity.getAddress();
+            } else {
+                throw new AuthorizationFailedException("ATHR-004", "You are not authorized to view/update/delete any one else's address");
+
+            }
+        }
+    }
+
+    /**
+     * This method is used to delete the address from data base
+     * If the value of variable active is 0 or null than the address will be deleted
+     * Otherwise the address Entity will be returned as is
+     *
+     * @param addressEntity The Address Entity that needed to be deleted or archieved
+     * @return Address Entity that has been deleted or archieved
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public AddressEntity deleteAddress(AddressEntity addressEntity) {
+        // active 1 indicates it is not linked to any order, so it can be deleted
+        if (addressEntity.getActive() == 1) {
+            AddressEntity deletedAddress = addressDao.deleteAddress(addressEntity);
+            return deletedAddress;
+        } else {
+            // active other than 1 say 0 indicates it is linked to an order and archived, so no delete happens
+            return addressEntity;
+        }
     }
 
     /**

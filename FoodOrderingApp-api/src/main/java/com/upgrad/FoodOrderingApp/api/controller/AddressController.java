@@ -84,6 +84,73 @@ public class AddressController {
     }
 
     /**
+     * This method is used to get All the saved addresses in descending order of their saved time
+     * for a signed in user
+     *
+     * @param authorization The Bearer authorization token from the headers
+     * @return Address List of all the saved the addresses in the db
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     */
+    @RequestMapping(method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/address/customer")
+    public ResponseEntity<AddressListResponse> getAllAddress(@RequestHeader("authorization") final String authorization)
+            throws AuthorizationFailedException {
+        CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
+        List<AddressEntity> addresss = addressService.getAllAddress(customer);
+        List<AddressList> addressLists = new ArrayList<>();
+        //Check if any address is returned or not
+        if (addresss != null && !addresss.isEmpty()) {
+            for (AddressEntity address : addresss) {
+                AddressList addressList = new AddressList();
+                AddressListState addressListState = new AddressListState();
+                addressListState.id(UUID.fromString(address.getState().getUuid())).stateName(address.getState().getStateName());
+                addressList.id(UUID.fromString(address.getUuid())).flatBuildingName(address.getFlatBuilNo()).
+                        locality(address.getLocality()).city(address.getCity()).pincode(address.getPincode()).state(addressListState);
+                addressLists.add(addressList);
+
+            }
+        }
+        AddressListResponse addressListResponse = new AddressListResponse();
+        addressListResponse.setAddresses(addressLists);
+        return new ResponseEntity<AddressListResponse>(addressListResponse, HttpStatus.OK);
+    }
+
+    /**
+     * This method is used to delete or archive an Address Entity from data base
+     * This will delete or archive the address only if the address Uuid passed in request is present in data base
+     * and the address Uuid requested for deletion is created by logged in User
+     * Also if the value of active fields for Address Entity to be deleted is 0 than it will deleted
+     * otherwise it will be archived
+     *
+     * @param authorization The Bearer authorization token from the headers
+     * @param addressUuid   The address Uuid passed in the request which needed to be deleted
+     * @return DeleteAddressResponse
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in data base
+     * @throws AddressNotFoundException     If the state uuid  is not present in state table
+     */
+    @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            path = {"/address/{address_id}", "/address"})
+    public ResponseEntity<DeleteAddressResponse> deleteAddress
+    (@RequestHeader("authorization") final String authorization, @PathVariable(name = "address_id", required = false) String addressUuid)
+            throws AuthorizationFailedException, AddressNotFoundException {
+        //checking if the address uuid is empty
+        if (addressUuid.isEmpty()) {
+            throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
+        }
+        CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
+        //fetching address entity from database according to address Id
+        AddressEntity addressToBeDeleted = addressService.getAddressByUUID(addressUuid, loggedCustomer);
+        //checking if the user who has created the address is same as logged in customer
+        DeleteAddressResponse deleteAddressResponse = new DeleteAddressResponse();
+        if (addressToBeDeleted != null) {
+            AddressEntity deletedAddress = addressService.deleteAddress(addressToBeDeleted);
+            deleteAddressResponse.setId(UUID.fromString(deletedAddress.getUuid()));
+            deleteAddressResponse.setStatus("ADDRESS DELETED SUCCESSFULLY");
+        }
+        return new ResponseEntity<DeleteAddressResponse>(deleteAddressResponse, HttpStatus.OK);
+    }
+
+    /**
      * This is used to get the list of all states
      * No authorization required for this endpoint
      *
