@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @Repository
 public class OrderDao {
@@ -33,5 +34,15 @@ public class OrderDao {
     public OrderItemEntity saveOrderItem(OrderItemEntity orderItem) {
         entityManager.persist(orderItem);
         return orderItem;
+    }
+
+    /**
+     * Retrieves the list of previously placed orders ordered by the date placed descending
+     *
+     * @param customerUUID The uuid of the customer for which orders has to be retrieved
+     * @return The Order details sorted in descending order of the data placed
+     */
+    public List<OrderEntity> getPastOrdersByCustomerId(String customerUUID) {
+        return entityManager.createNamedQuery("pastOrdersByCustomerUUID", OrderEntity.class).setParameter("customerUUID", customerUUID).getResultList();
     }
 }

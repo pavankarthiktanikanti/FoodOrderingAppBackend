@@ -1,6 +1,7 @@
 package com.upgrad.FoodOrderingApp.service.business;
 
 import com.upgrad.FoodOrderingApp.service.dao.CouponDao;
+import com.upgrad.FoodOrderingApp.service.dao.ItemDao;
 import com.upgrad.FoodOrderingApp.service.dao.OrderDao;
 import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
 import com.upgrad.FoodOrderingApp.service.entity.OrderEntity;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +25,9 @@ public class OrderService {
 
     @Autowired
     private OrderDao orderDao;
+
+    @Autowired
+    private ItemDao itemDao;
 
     /**
      * Retrieve the Coupon Information matched with the Coupon name passed
@@ -90,5 +95,25 @@ public class OrderService {
     public OrderItemEntity saveOrderItem(OrderItemEntity orderItem) {
         orderDao.saveOrderItem(orderItem);
         return orderItem;
+    }
+
+    /**
+     * Retrieves the list of orders matched by the customer uuid
+     *
+     * @param customerUUID The uuid of the logged in customer
+     * @return The list of Order details fetched from Dao (Database)
+     */
+    public List<OrderEntity> getOrdersByCustomers(String customerUUID) {
+        return orderDao.getPastOrdersByCustomerId(customerUUID);
+    }
+
+    /**
+     * Retrieves the list of available items under a particular order using id of order
+     *
+     * @param orderId The id value of Order entity
+     * @return The list of items placed with the order
+     */
+    public List<OrderItemEntity> getOrderItemsByOrderId(Integer orderId) {
+        return itemDao.getItemsByOrderId(orderId);
     }
 }

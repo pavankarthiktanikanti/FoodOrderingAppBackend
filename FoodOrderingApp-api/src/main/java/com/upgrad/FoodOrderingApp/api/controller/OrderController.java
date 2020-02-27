@@ -1,9 +1,6 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
-import com.upgrad.FoodOrderingApp.api.model.ItemQuantity;
-import com.upgrad.FoodOrderingApp.api.model.OrderListCoupon;
-import com.upgrad.FoodOrderingApp.api.model.SaveOrderRequest;
-import com.upgrad.FoodOrderingApp.api.model.SaveOrderResponse;
+import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.business.*;
 import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.*;
@@ -14,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -149,5 +148,96 @@ public class OrderController {
         SaveOrderResponse response = new SaveOrderResponse();
         response.id(savedOrder.getUuid()).status("ORDER SUCCESSFULLY PLACED");
         return new ResponseEntity<SaveOrderResponse>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Validate customer session and retrieves the list of past orders placed by logged in user
+     * throws error when customer access token is invalid/expired/logged out
+     *
+     * @param authorization The Bearer authorization token from the headers
+     * @return The List of orders along with the items ordered
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     */
+    @RequestMapping(method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/order")
+    public ResponseEntity<CustomerOrderResponse> getPastOrdersOfUser(@RequestHeader("authorization") final String authorization)
+            throws AuthorizationFailedException {
+        // Validate customer session
+        CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
+
+        // Get all the past orders by customer uuid
+        List<OrderEntity> pastOrders = orderService.getOrdersByCustomers(customer.getUuid());
+        CustomerOrderResponse response = new CustomerOrderResponse();
+        if (pastOrders != null && !pastOrders.isEmpty()) {
+            pastOrders.forEach(pastOrder -> {
+                OrderList orderList = new OrderList();
+                // Set the bill details
+                orderList.id(UUID.fromString(pastOrder.getUuid())).bill(BigDecimal.valueOf(pastOrder.getBill()))
+                        .discount(BigDecimal.valueOf(pastOrder.getDiscount())).date(pastOrder.getDate().toString());
+
+                CouponEntity pastOrderCoupon = pastOrder.getCoupon();
+                // Set the coupon details if any applied while placing the order
+                if (pastOrderCoupon != null) {
+                    OrderListCoupon coupon = new OrderListCoupon();
+                    coupon.id(UUID.fromString(pastOrderCoupon.getUuid()));
+                    coupon.couponName(pastOrderCoupon.getCouponName());
+                    coupon.percent(pastOrderCoupon.getPercent());
+                    orderList.coupon(coupon);
+                }
+
+                // Set the payment information of the order used while placing it
+                OrderListPayment payment = new OrderListPayment();
+                payment.id(UUID.fromString(pastOrder.getPayment().getUuid())).paymentName(pastOrder.getPayment().getPaymentName());
+
+                // Set the customer details for each order in the response
+                OrderListCustomer orderListCustomer = new OrderListCustomer();
+                CustomerEntity orderCustomer = pastOrder.getCustomer();
+                orderListCustomer.id(UUID.fromString(orderCustomer.getUuid())).firstName(orderCustomer.getFirstName())
+                        .lastName(orderCustomer.getLastName()).emailAddress(orderCustomer.getEmail()).contactNumber(orderCustomer.getContactNumber());
+
+                orderList.payment(payment).customer(orderListCustomer);
+
+                // Set the Address details in the response for which order is placed
+                OrderListAddress orderListAddress = new OrderListAddress();
+                AddressEntity orderAddress = pastOrder.getAddress();
+                orderListAddress.id(UUID.fromString(orderAddress.getUuid())).flatBuildingName(orderAddress.getFlatBuilNo())
+                        .locality(orderAddress.getLocality()).city(orderAddress.getCity()).pincode(orderAddress.getPincode());
+
+                // Set the State information of address in the response
+                OrderListAddressState orderListAddressState = new OrderListAddressState();
+                StateEntity orderState = orderAddress.getState();
+                orderListAddressState.id(UUID.fromString(orderState.getUuid())).stateName(orderState.getStateName());
+                orderListAddress.state(orderListAddressState);
+
+                orderList.address(orderListAddress);
+                
+                // Fetch all the items by using the order id value
+                List<OrderItemEntity> orderItems = orderService.getOrderItemsByOrderId(pastOrder.getId());
+                if (orderItems != null) {
+                    orderItems.stream().forEach(orderItem -> {
+                        // Populate each item detail in the response
+                        ItemQuantityResponse itemQuantityResponse = new ItemQuantityResponse();
+                        itemQuantityResponse.quantity(orderItem.getQuantity()).price(orderItem.getPrice());
+                        ItemQuantityResponseItem itemQuantityResponseItem = new ItemQuantityResponseItem();
+                        itemQuantityResponseItem.id(UUID.fromString(orderItem.getItem().getUuid()))
+                                .itemName(orderItem.getItem().getItemName()).itemPrice(orderItem.getPrice())
+                                .type(ItemQuantityResponseItem.TypeEnum.fromValue(orderItem.getItem().getType().getValue()));
+                        itemQuantityResponse.item(itemQuantityResponseItem);
+                        orderList.addItemQuantitiesItem(itemQuantityResponse);
+                    });
+                }
+
+                // If in case the items are empty, set an empty list in the response
+                if (orderList.getItemQuantities() == null) {
+                    orderList.setItemQuantities(new ArrayList<ItemQuantityResponse>());
+                }
+                response.addOrdersItem(orderList);
+            });
+        }
+        // If the user has no previous order, set an empty list
+        if (response.getOrders() == null) {
+            response.setOrders(new ArrayList<OrderList>());
+        }
+        return new ResponseEntity<CustomerOrderResponse>(response, HttpStatus.OK);
     }
 }

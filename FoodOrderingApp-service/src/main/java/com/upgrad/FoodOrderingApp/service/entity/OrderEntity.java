@@ -11,6 +11,9 @@ import java.util.Date;
 
 @Entity
 @Table(name = "ORDERS")
+@NamedQueries({
+        @NamedQuery(name = "pastOrdersByCustomerUUID", query = "select o from OrderEntity o where o.customer.uuid = :customerUUID order by o.date desc")
+})
 public class OrderEntity {
 
     @Id
@@ -31,9 +34,10 @@ public class OrderEntity {
     @JoinColumn(name = "coupon_id")
     private CouponEntity coupon;
 
+    // Set default value
     @Column(name = "discount")
     @ColumnDefault("0")
-    private Double discount;
+    private Double discount = 0.0;
 
     @Column(name = "date")
     @NotNull
