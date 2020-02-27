@@ -54,12 +54,7 @@ public class AddressController {
             throws SaveAddressException, AddressNotFoundException, AuthorizationFailedException {
 
         CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
-        // Check if any of the fields are not set, if so throw Error message
-        if (FoodOrderingUtil.isInValid(saveAddressRequest.getFlatBuildingName()) || FoodOrderingUtil.isInValid(saveAddressRequest.getLocality())
-                || FoodOrderingUtil.isInValid(saveAddressRequest.getCity()) || FoodOrderingUtil.isInValid(saveAddressRequest.getPincode()) ||
-                FoodOrderingUtil.isInValid(saveAddressRequest.getStateUuid())) {
-            throw new SaveAddressException("SAR-001", "No field can be empty");
-        }
+
         // Check if the state id passed is present State table or not
         StateEntity state = addressService.getStateByUUID(saveAddressRequest.getStateUuid());
 
@@ -134,7 +129,7 @@ public class AddressController {
     (@RequestHeader("authorization") final String authorization, @PathVariable(name = "address_id", required = false) String addressUuid)
             throws AuthorizationFailedException, AddressNotFoundException {
         //checking if the address uuid is empty
-        if (addressUuid.isEmpty()) {
+        if (FoodOrderingUtil.isInValid(addressUuid)) {
             throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
         }
         CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
