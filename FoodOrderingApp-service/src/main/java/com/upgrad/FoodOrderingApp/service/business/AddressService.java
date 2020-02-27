@@ -35,6 +35,14 @@ public class AddressService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public AddressEntity saveAddress(AddressEntity address, CustomerEntity customer) throws SaveAddressException {
+
+        // Check if any of the fields are not set, if so throw Error message
+        if (FoodOrderingUtil.isInValid(address.getFlatBuilNo()) || FoodOrderingUtil.isInValid(address.getLocality())
+                || FoodOrderingUtil.isInValid(address.getCity()) || FoodOrderingUtil.isInValid(address.getPincode()) ||
+                address.getState() == null) {
+            throw new SaveAddressException("SAR-001", "No field can be empty");
+        }
+
         // Check if the pincode entered is valid or not
         if (FoodOrderingUtil.isInvalidPinCode(address.getPincode())) {
             throw new SaveAddressException("SAR-002", "Invalid pincode");
@@ -92,18 +100,17 @@ public class AddressService {
      * @throws AuthorizationFailedException If customer is not the one who has created the address
      */
     public AddressEntity getAddressByUUID(String addressUuid, CustomerEntity loggedCustomer) throws AddressNotFoundException, AuthorizationFailedException {
-        CustomerAddressEntity customerAddressEntity = addressDao.getAddressByUUID(addressUuid);
-        if (customerAddressEntity == null) {
+        AddressEntity address = addressDao.getAddressByUUID(addressUuid);
+        if (address == null) {
             throw new AddressNotFoundException("ANF-003", "No address by this id");
-        } else {
-            //if the customer who has logged in is not same as the customer which belongs to the address to be deleted
-            if (customerAddressEntity.getCustomer() != null && customerAddressEntity.getCustomer().getId() == loggedCustomer.getId()) {
-                return customerAddressEntity.getAddress();
-            } else {
-                throw new AuthorizationFailedException("ATHR-004", "You are not authorized to view/update/delete any one else's address");
-
-            }
         }
+        CustomerAddressEntity customerAddressEntity = addressDao.getCustomerAddressByAddressUUID(addressUuid);
+        //if the customer who has logged in is not same as the customer which belongs to the address to be deleted
+        if (customerAddressEntity == null || (customerAddressEntity.getCustomer() != null
+                && customerAddressEntity.getCustomer().getId() != loggedCustomer.getId())) {
+            throw new AuthorizationFailedException("ATHR-004", "You are not authorized to view/update/delete any one else's address");
+        }
+        return customerAddressEntity.getAddress();
     }
 
     /**
