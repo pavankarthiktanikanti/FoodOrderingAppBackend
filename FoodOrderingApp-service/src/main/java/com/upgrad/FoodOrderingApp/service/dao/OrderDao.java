@@ -1,10 +1,10 @@
 package com.upgrad.FoodOrderingApp.service.dao;
 
-import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
+import com.upgrad.FoodOrderingApp.service.entity.OrderEntity;
+import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
@@ -15,22 +15,34 @@ public class OrderDao {
     private EntityManager entityManager;
 
     /**
-     * Retrieves the Coupon Entity matched with the coupon name
+     * Saves the Order Information in the Database
      *
-     * @param couponName The coupon name to be searched in Database
-     * @return The Coupon Entity matched with the coupon name
+     * @param order The order details to be saved
+     * @return The persisted order with id value generated
      */
-    public CouponEntity getCouponByCouponName(String couponName) {
-        try {
-            // Reading as List, if there are several records matching with the same coupon, take the first coupon record
-            List<CouponEntity> couponList = entityManager.createNamedQuery("couponByCouponName", CouponEntity.class).setParameter("couponName", couponName).getResultList();
-            if (couponList != null && !couponList.isEmpty()) {
-                return couponList.get(0);
-            } else {
-                return null;
-            }
-        } catch (NoResultException e) {
-            return null;
-        }
+    public OrderEntity saveOrderDetail(OrderEntity order) {
+        entityManager.persist(order);
+        return order;
+    }
+
+    /**
+     * Saves the Order Item Information in the Database
+     *
+     * @param orderItem The order item details to be saved
+     * @return The persisted order item with id value generated
+     */
+    public OrderItemEntity saveOrderItem(OrderItemEntity orderItem) {
+        entityManager.persist(orderItem);
+        return orderItem;
+    }
+
+    /**
+     * Retrieves the list of previously placed orders ordered by the date placed descending
+     *
+     * @param customerUUID The uuid of the customer for which orders has to be retrieved
+     * @return The Order details sorted in descending order of the data placed
+     */
+    public List<OrderEntity> getPastOrdersByCustomerId(String customerUUID) {
+        return entityManager.createNamedQuery("pastOrdersByCustomerUUID", OrderEntity.class).setParameter("customerUUID", customerUUID).getResultList();
     }
 }
