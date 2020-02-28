@@ -28,7 +28,7 @@ public class FoodOrderingUtil {
      * @return true if it doesn't match the pattern, false otherwise
      */
     public static Boolean isInValidEmail(String email) {
-        String regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+(?:\\.[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+)*@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";
+        String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
 
         Pattern pattern = Pattern.compile(regex);
         return !pattern.matcher(email).matches();
@@ -61,7 +61,7 @@ public class FoodOrderingUtil {
         // (?=.*[#@$%&*!^]) at least one among the listed special characters
         // (.*) remaining can be any character
         // {8,} length at least 8
-        String regex = "(?=.*[A-Z])(?=.*\\d)(?=.*[#@$%&*!^])(.*){8,}";
+        String regex = "(?=^.{8,}$)(?=.*[A-Z])(?=.*\\d)(?=.*[#@$%&*!^])(.*)";
         Pattern pattern = Pattern.compile(regex);
         return pattern.matcher(password).matches();
     }
