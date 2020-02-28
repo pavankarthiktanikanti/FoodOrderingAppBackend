@@ -39,14 +39,6 @@ public class CustomerService {
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerEntity saveCustomer(CustomerEntity customer) throws SignUpRestrictedException {
 
-        // Check if any of the fields are not set, if so throw Error message
-        if (FoodOrderingUtil.isInValid(customer.getFirstName())
-                || FoodOrderingUtil.isInValid(customer.getEmail())
-                || FoodOrderingUtil.isInValid(customer.getContactNumber())
-                || FoodOrderingUtil.isInValid(customer.getPassword())) {
-            throw new SignUpRestrictedException("SGR-005", "Except last name all fields should be filled");
-        }
-
         // Check if the email id format is not valid
         if (FoodOrderingUtil.isInValidEmail(customer.getEmail())) {
             throw new SignUpRestrictedException("SGR-002", "Invalid email-id format!");
