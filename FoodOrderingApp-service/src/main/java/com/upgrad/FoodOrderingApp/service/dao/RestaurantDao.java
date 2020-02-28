@@ -75,5 +75,15 @@ public class RestaurantDao {
         }
     }
 
+    /**
+     * This method is used to update the customer rating for a restaurant
+     *
+     * @param updatedRestaurantEntity Restaurant Entity that needs to be updated in the data base
+     * @return Restaurant Entity for which the customer rating has been updated
+     */
+    public RestaurantEntity updateRestaurantRating(RestaurantEntity updatedRestaurantEntity) {
+        entityManager.merge(updatedRestaurantEntity);
+        return updatedRestaurantEntity;
+    }
 
 }

@@ -5,9 +5,12 @@ import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
+import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -90,6 +93,30 @@ public class RestaurantService {
             throw new CategoryNotFoundException("CNF-002", "No category by this id");
         }
         return restaurantDao.restaurantByCategory(uuid);
+    }
+
+    /**
+     * This method is used to update the average customer rating for a particular restaurant
+     *
+     * @param restaurantEntity Restaurant for which the rating has to be updated
+     * @param customerRating   Customer rating field entered by the customer
+     * @return Restaurant Entity for which the rating has been updated
+     * @throws InvalidRatingException If the customer rating field entered by the customer is empty or is not in the range of 1 to 5
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public RestaurantEntity updateRestaurantRating(RestaurantEntity restaurantEntity, Double customerRating) throws InvalidRatingException {
+        if (customerRating != null && customerRating >= 1 && customerRating <= 5) {
+            double avgRating = restaurantEntity.getCustomerRating();
+            int noOfCustomerRated = restaurantEntity.getNumberCustomersRated();
+            int updatednoOfCustomerRated = noOfCustomerRated + 1;
+            double updatedAvgRating = ((avgRating * noOfCustomerRated) + customerRating) / updatednoOfCustomerRated;
+            restaurantEntity.setCustomerRating(updatedAvgRating);
+            restaurantEntity.setNumberCustomersRated(updatednoOfCustomerRated);
+            return restaurantDao.updateRestaurantRating(restaurantEntity);
+
+        } else {
+            throw new InvalidRatingException("IRE-001", "Restaurant should be in the range of 1 to 5");
+        }
     }
 
 }

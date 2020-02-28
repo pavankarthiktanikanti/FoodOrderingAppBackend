@@ -2,14 +2,15 @@ package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.business.CategoryService;
+import com.upgrad.FoodOrderingApp.service.business.CustomerService;
 import com.upgrad.FoodOrderingApp.service.business.ItemService;
 import com.upgrad.FoodOrderingApp.service.business.RestaurantService;
-import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
-import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
-import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
-import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
+import com.upgrad.FoodOrderingApp.service.entity.*;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
+import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
+import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,6 +35,9 @@ public class RestaurantController {
 
     @Autowired
     private ItemService itemService;
+
+    @Autowired
+    private CustomerService customerService;
 
     /**
      * This method returns the list of all available restaurants with the details
@@ -129,6 +133,36 @@ public class RestaurantController {
 
         return new ResponseEntity<RestaurantDetailsResponse>(restaurantDetailsResponse, HttpStatus.OK);
 
+    }
+
+    /**
+     * This method is used to update the average customer rating of a particular restaurant
+     * Here the customer_rating should be between 1 and 5 (both inclusive)
+     *
+     * @param authorization  The Bearer authorization token from the headers
+     * @param restaurantUuid The restaurant uuid of the restaurant for which the rating has to be updated
+     * @param customerRating The customer rating passed by the customer
+     * @return
+     * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
+     * @throws RestaurantNotFoundException  If the restaurant id field entered by the customer is empty
+     *                                      or If there is no restaurant by the uuid entered by the customer
+     * @throws InvalidRatingException       If the customer rating field entered by the customer is empty or is not in the range of 1 to 5
+     */
+    @RequestMapping(method = RequestMethod.PUT, path = {"/api/restaurant/{restaurant_id}", "/api/restaurant"})
+    public ResponseEntity<RestaurantUpdatedResponse> updateRestaurantRating(@RequestHeader("authorization") final String authorization,
+                                                                            @PathVariable(name = "restaurant_id", required = false) String restaurantUuid,
+                                                                            @RequestParam(name = "customer_rating") Double customerRating
+    )
+            throws AuthorizationFailedException, RestaurantNotFoundException, InvalidRatingException {
+        CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
+
+        RestaurantEntity restaurantEntity = restaurantService.restaurantByUUID(restaurantUuid);
+
+        RestaurantEntity updatedRestaurantEntity = restaurantService.updateRestaurantRating(restaurantEntity, customerRating);
+        RestaurantUpdatedResponse restaurantUpdatedResponse = new RestaurantUpdatedResponse();
+        restaurantUpdatedResponse.setId(UUID.fromString(updatedRestaurantEntity.getUuid()));
+        restaurantUpdatedResponse.setStatus("RESTAURANT RATING UPDATED SUCCESSFULLY");
+        return new ResponseEntity<RestaurantUpdatedResponse>(restaurantUpdatedResponse, HttpStatus.OK);
     }
 
     /**
