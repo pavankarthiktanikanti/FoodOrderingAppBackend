@@ -50,12 +50,13 @@ public class RestaurantService {
      */
     public List<RestaurantEntity> restaurantsByName(String restaurantName) throws RestaurantNotFoundException {
         // checks if restaurant name field entered by customer is empty or not
-        if (restaurantName.isEmpty() || restaurantName == null) {
+        if (restaurantName == null || restaurantName.isEmpty()) {
             throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
         }
         //here we are concating restuarant name passed in request so that it become like %restaurantName%
-        String likeRestaurantName = "".concat("%").concat(restaurantName).concat("%");
-        List<RestaurantEntity> restaurants = restaurantDao.restaurantsByName(likeRestaurantName);
+        StringBuilder likeRestaurantName = new StringBuilder();
+        likeRestaurantName.append("%").append(restaurantName).append("%");
+        List<RestaurantEntity> restaurants = restaurantDao.restaurantsByName(likeRestaurantName.toString());
         return restaurants;
     }
 }

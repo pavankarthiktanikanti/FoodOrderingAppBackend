@@ -63,7 +63,7 @@ public class RestaurantController {
      * @return List of all restraunt partially matching the name passed in alphabetic order of restraunt name
      * @throws RestaurantNotFoundException If restaurant name field entered by the customer is empty
      */
-    @RequestMapping(method = RequestMethod.GET, path = {"/restaurant/name/{reastaurant_name}", "/restaurant/name"},
+    @RequestMapping(method = RequestMethod.GET, path = {"/restaurant/name/{restaurant_name}", "/restaurant/name"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<RestaurantListResponse> restaurantsByName(@PathVariable(name = "reastaurant_name", required = false)
                                                                             String restaurantName) throws RestaurantNotFoundException {
