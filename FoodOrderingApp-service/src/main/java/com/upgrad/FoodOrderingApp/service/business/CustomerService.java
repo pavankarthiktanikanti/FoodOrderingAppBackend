@@ -38,6 +38,15 @@ public class CustomerService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerEntity saveCustomer(CustomerEntity customer) throws SignUpRestrictedException {
+
+        // Check if any of the fields are not set, if so throw Error message
+        if (FoodOrderingUtil.isInValid(customer.getFirstName())
+                || FoodOrderingUtil.isInValid(customer.getEmail())
+                || FoodOrderingUtil.isInValid(customer.getContactNumber())
+                || FoodOrderingUtil.isInValid(customer.getPassword())) {
+            throw new SignUpRestrictedException("SGR-005", "Except last name all fields should be filled");
+        }
+
         // Check if the email id format is not valid
         if (FoodOrderingUtil.isInValidEmail(customer.getEmail())) {
             throw new SignUpRestrictedException("SGR-002", "Invalid email-id format!");
@@ -58,12 +67,14 @@ public class CustomerService {
             throw new SignUpRestrictedException("SGR-001", "This contact number is already registered! Try other contact number.");
         }
 
+        // Generate random uuid
+        customer.setUuid(UUID.randomUUID().toString());
         // Generate encrypted password and store the Customer details in Database
         String password = customer.getPassword();
         String[] encryptedText = cryptographyProvider.encrypt(password);
         customer.setSalt(encryptedText[0]);
         customer.setPassword(encryptedText[1]);
-        customerDao.saveCustomer(customer);
+        customer = customerDao.saveCustomer(customer);
         return customer;
     }
 
