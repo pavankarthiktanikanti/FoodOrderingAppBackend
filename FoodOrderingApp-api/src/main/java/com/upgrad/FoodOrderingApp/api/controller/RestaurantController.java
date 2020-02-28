@@ -72,7 +72,7 @@ public class RestaurantController {
      */
     @RequestMapping(method = RequestMethod.GET, path = {"/restaurant/name/{restaurant_name}", "/restaurant/name"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<RestaurantListResponse> restaurantsByName(@PathVariable(name = "reastaurant_name", required = false)
+    public ResponseEntity<RestaurantListResponse> restaurantsByName(@PathVariable(name = "restaurant_name", required = false)
                                                                             String restaurantName) throws RestaurantNotFoundException {
         List<RestaurantEntity> restaurantEntityList = restaurantService.restaurantsByName(restaurantName);
         if (restaurantEntityList != null) {
