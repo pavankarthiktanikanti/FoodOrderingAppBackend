@@ -1,13 +1,12 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
-import com.upgrad.FoodOrderingApp.api.model.RestaurantDetailsResponseAddress;
-import com.upgrad.FoodOrderingApp.api.model.RestaurantDetailsResponseAddressState;
-import com.upgrad.FoodOrderingApp.api.model.RestaurantList;
-import com.upgrad.FoodOrderingApp.api.model.RestaurantListResponse;
+import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.business.CategoryService;
+import com.upgrad.FoodOrderingApp.service.business.ItemService;
 import com.upgrad.FoodOrderingApp.service.business.RestaurantService;
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
+import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
@@ -32,6 +31,9 @@ public class RestaurantController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private ItemService itemService;
 
     /**
      * This method returns the list of all available restaurants with the details
@@ -109,6 +111,27 @@ public class RestaurantController {
 
 
     /**
+     * This method is used find list of  all the restaurants based upon restaurant uuid passed
+     * This method request restaurant uuid from the customer as a path variable
+     *
+     * @param restaurantUuid The restaurant uuid passed in the path variable
+     * @return Restaurant Detail Response with Http status
+     * @throws RestaurantNotFoundException If the restaurant id field entered by the customer is empty or
+     *                                     If there is no restaurant by the uuid entered by the customer
+     */
+    @RequestMapping(method = RequestMethod.GET, path = {"/api/restaurant/{restaurant_id}", "/api/restaurant"},
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantDetailsResponse> restaurantByUUID(@PathVariable(name = "restaurant_id", required = false)
+                                                                              String restaurantUuid) throws RestaurantNotFoundException {
+        RestaurantEntity restaurantEntity = restaurantService.restaurantByUUID(restaurantUuid);
+
+        RestaurantDetailsResponse restaurantDetailsResponse = populateRestaurantDetailsResponse(restaurantEntity);
+
+        return new ResponseEntity<RestaurantDetailsResponse>(restaurantDetailsResponse, HttpStatus.OK);
+
+    }
+
+    /**
      * Populate the list of restaurant responses to be sent for the request from the list of
      * restaurants retrieved from Database
      *
@@ -153,5 +176,60 @@ public class RestaurantController {
             restaurantsList.add(restaurantList);
         }
         return restaurantsList;
+    }
+
+    /**
+     * This method gets the Restaurant Entity and converts to RestaurantDetailResponse
+     *
+     * @param restaurantEntity The restaurant Entity fetched from database
+     * @return Restaurant Detail Response
+     */
+    private RestaurantDetailsResponse populateRestaurantDetailsResponse(RestaurantEntity restaurantEntity) {
+        // Frame the address in response
+        AddressEntity restaurantAddress = restaurantEntity.getAddress();
+
+        RestaurantDetailsResponseAddress responseAddress = new RestaurantDetailsResponseAddress();
+
+        responseAddress.id(UUID.fromString(restaurantAddress.getUuid())).flatBuildingName(restaurantAddress.getFlatBuilNo())
+                .locality(restaurantAddress.getLocality()).city(restaurantAddress.getCity()).pincode(restaurantAddress.getPincode());
+
+
+        RestaurantDetailsResponseAddressState state = new RestaurantDetailsResponseAddressState();
+        state.id(UUID.fromString(restaurantAddress.getState().getUuid())).stateName(restaurantAddress.getState().getStateName());
+        responseAddress.state(state);
+
+        RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
+        // Add restaurant details to the response object
+        restaurantDetailsResponse.id(UUID.fromString(restaurantEntity.getUuid())).restaurantName(restaurantEntity.getRestaurantName())
+                .address(responseAddress).photoURL(restaurantEntity.getPhotoUrl()).customerRating(BigDecimal.valueOf(restaurantEntity.getCustomerRating()))
+                .averagePrice(restaurantEntity.getAvgPrice()).numberCustomersRated(restaurantEntity.getNumberCustomersRated());
+
+        // Get the list of all categories for the restaurant uuid passed
+        List<CategoryEntity> restaurantCategories = categoryService.getCategoriesByRestaurant(restaurantEntity.getUuid());
+
+        // Frame category List Response
+        List<CategoryList> categoryListArrayList = new ArrayList<>();
+        for (CategoryEntity restaurantCategory : restaurantCategories) {
+            // Creating a category list
+            CategoryList categoryList = new CategoryList();
+            // Frame category list
+            categoryList.id(UUID.fromString(restaurantCategory.getUuid())).categoryName(restaurantCategory.getCategoryName());
+            // Getting List of Item Entities from data base
+            List<ItemEntity> itemEntities = itemService.getItemsByCategoryAndRestaurant(restaurantEntity.getUuid(), restaurantCategory.getUuid());
+            // Frame Item list
+            List<ItemList> itemListArrayList = new ArrayList<>();
+            for (ItemEntity itemEntity : itemEntities) {
+                ItemList itemList = new ItemList();
+                itemList.id(UUID.fromString(itemEntity.getUuid())).itemName(itemEntity.getItemName()).price(itemEntity.getPrice()).
+                        itemType(ItemList.ItemTypeEnum.fromValue(itemEntity.getType().toString()));
+                itemListArrayList.add(itemList);
+            }
+            categoryList.itemList(itemListArrayList);
+            // Add categoryList to List<categoryList>
+            categoryListArrayList.add(categoryList);
+        }
+        restaurantDetailsResponse.categories(categoryListArrayList);
+
+        return restaurantDetailsResponse;
     }
 }

@@ -59,4 +59,21 @@ public class RestaurantDao {
         return entityManager.createNamedQuery("restaurantsByCategory", RestaurantEntity.class).
                 setParameter("uuid", uuid).getResultList();
     }
+
+    /**
+     * This method is used to find Restaurant Entity based upon the restaurant uuid
+     *
+     * @param uuid restaurant uuid based upon which Restaurant Entity will be retrieved
+     * @return Restaurant Entity if a restaurant is found based upon the restaurant uuid otherwise return null
+     */
+    public RestaurantEntity restaurantByUUID(String uuid) {
+        try {
+            return entityManager.createNamedQuery("restaurantByUuid", RestaurantEntity.class).
+                    setParameter("uuid", uuid).getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
+
 }

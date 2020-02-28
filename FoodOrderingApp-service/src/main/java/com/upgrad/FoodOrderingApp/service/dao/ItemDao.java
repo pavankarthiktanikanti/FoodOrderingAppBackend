@@ -1,5 +1,6 @@
 package com.upgrad.FoodOrderingApp.service.dao;
 
+import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
 import org.springframework.stereotype.Repository;
@@ -37,5 +38,17 @@ public class ItemDao {
      */
     public List<OrderItemEntity> getItemsByOrderId(Integer orderId) {
         return entityManager.createNamedQuery("itemsByOrderId", OrderItemEntity.class).setParameter("id", orderId).getResultList();
+    }
+
+    /**
+     * This method is used to retrieve list of Category Entity based upon the restaurant uuid and category uuid
+     *
+     * @param restaurantUuid restaurant uuid
+     * @param categoryUuid   category uuid
+     * @return List of Category Entities based upon the restaurant uuid and category uuid
+     */
+    public List<CategoryEntity> getItemsByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
+        return entityManager.createNamedQuery("itemsByCategoryAndRestaurant", CategoryEntity.class).
+                setParameter("categoryUuid", categoryUuid).setParameter("restaurantUuid", restaurantUuid).getResultList();
     }
 }

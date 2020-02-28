@@ -35,9 +35,14 @@ public class RestaurantService {
      *
      * @param restaurantUUID The uuid of restaurant to search for
      * @return The Restaurant Details retrieved from Database
-     * @throws RestaurantNotFoundException If the uuid doesn't match with any database records
+     * @throws RestaurantNotFoundException If the uuid doesn't match with any database records or
+     *                                     if the restaurant uuid passed is null or empty
      */
     public RestaurantEntity restaurantByUUID(String restaurantUUID) throws RestaurantNotFoundException {
+        //if the restaurant uuid passed is null or empty
+        if (restaurantUUID == null || restaurantUUID.isEmpty()) {
+            throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty");
+        }
         RestaurantEntity restaurant = restaurantDao.getRestaurantByUUID(restaurantUUID);
         if (restaurant != null) {
             return restaurant;
@@ -59,7 +64,7 @@ public class RestaurantService {
         if (restaurantName == null || restaurantName.isEmpty()) {
             throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
         }
-        //here we are concating restuarant name passed in request so that it become like %restaurantName%
+        //here we are concatenating restaurant name passed in request so that it become like %restaurantName%
         StringBuilder likeRestaurantName = new StringBuilder();
         likeRestaurantName.append("%").append(restaurantName).append("%");
         List<RestaurantEntity> restaurants = restaurantDao.restaurantsByName(likeRestaurantName.toString());
