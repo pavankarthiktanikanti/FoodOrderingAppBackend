@@ -48,4 +48,15 @@ public class RestaurantDao {
         return entityManager.createNamedQuery("restaurantsByName", RestaurantEntity.class).
                 setParameter("likeRestaurantName", likeRestaurantName).getResultList();
     }
+
+    /**
+     * This method is used to find the list of restaurants having same category uuid as passed in the request
+     *
+     * @param uuid The category uuid based upon which restaurants will be fetched from database
+     * @return List of Restaurants
+     */
+    public List<RestaurantEntity> restaurantByCategory(String uuid) {
+        return entityManager.createNamedQuery("restaurantsByCategory", RestaurantEntity.class).
+                setParameter("uuid", uuid).getResultList();
+    }
 }

@@ -1,7 +1,10 @@
 package com.upgrad.FoodOrderingApp.service.business;
 
+import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;
+import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,9 @@ public class RestaurantService {
 
     @Autowired
     private RestaurantDao restaurantDao;
+
+    @Autowired
+    private CategoryDao categoryDao;
 
     /**
      * Retrieves the list of available Restaurants ordered by rating descending
@@ -59,4 +65,26 @@ public class RestaurantService {
         List<RestaurantEntity> restaurants = restaurantDao.restaurantsByName(likeRestaurantName.toString());
         return restaurants;
     }
+
+    /**
+     * This method is used to find restaurants based upon Category uuid passed
+     *
+     * @param uuid The category Uuid based upon which restaurants will be fetched
+     * @return List of Restaurants that have the same cateory uuid
+     * @throws CategoryNotFoundException If the category id field entered by the customer is empty or
+     *                                   If there is no category by the uuid entered by the customer
+     */
+    public List<RestaurantEntity> restaurantByCategory(String uuid) throws CategoryNotFoundException {
+        //If the category id field entered by the customer is empty
+        if (uuid == null || uuid.isEmpty()) {
+            throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
+        }
+        CategoryEntity categoryEntity = categoryDao.getCategoryByUUID(uuid);
+        //If there is no category by the uuid entered by the customer
+        if (categoryEntity == null) {
+            throw new CategoryNotFoundException("CNF-002", "No category by this id");
+        }
+        return restaurantDao.restaurantByCategory(uuid);
+    }
+
 }

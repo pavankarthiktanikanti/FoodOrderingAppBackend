@@ -9,6 +9,7 @@ import com.upgrad.FoodOrderingApp.service.business.RestaurantService;
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,7 +61,7 @@ public class RestaurantController {
      * Also the name searched is not be case sensitive
      *
      * @param restaurantName The restaurant name field send in the resquest
-     * @return List of all restraunt partially matching the name passed in alphabetic order of restraunt name
+     * @return List of all restaurant partially matching the name passed in alphabetic order of restraunt name
      * @throws RestaurantNotFoundException If restaurant name field entered by the customer is empty
      */
     @RequestMapping(method = RequestMethod.GET, path = {"/restaurant/name/{restaurant_name}", "/restaurant/name"},
@@ -79,6 +80,33 @@ public class RestaurantController {
         response.setRestaurants(restaurantList);
         return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
     }
+
+
+    /**
+     * This method is used to get restaurants based upon the category uuid
+     * This method requests the category uuid as string from the customer as a path variable
+     *
+     * @param categoryId The category uuid based upon which restaurants will be fetched from database
+     * @return List all restaurants having same catergory uuid
+     * @throws CategoryNotFoundException If the category id field entered by the customer is empty or
+     *                                   If there is no category by the uuid entered by the customer
+     */
+    @RequestMapping(method = RequestMethod.GET, path = {"/restaurant/category/{category_id}", "/restaurant/category"},
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantListResponse> restaurantByCategory(@PathVariable(name = "category_id", required = false)
+                                                                               String categoryId) throws CategoryNotFoundException {
+        List<RestaurantEntity> restaurantsListByUuid = restaurantService.restaurantByCategory(categoryId);
+        if (restaurantsListByUuid != null) {
+            for (RestaurantEntity restaurant : restaurantsListByUuid) {
+                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
+            }
+        }
+        List<RestaurantList> restaurantsList = populateRestaurantList(restaurantsListByUuid);
+        RestaurantListResponse response = new RestaurantListResponse();
+        response.setRestaurants(restaurantsList);
+        return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
+    }
+
 
     /**
      * Populate the list of restaurant responses to be sent for the request from the list of
