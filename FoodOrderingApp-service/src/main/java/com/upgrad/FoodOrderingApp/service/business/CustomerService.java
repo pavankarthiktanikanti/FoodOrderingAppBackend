@@ -177,8 +177,8 @@ public class CustomerService {
         // Check if old encrypted password matches with Database records
         if (encryptedPassword.equals(customerToUpdate.getPassword())) {
             final String[] encryptedNewPassword = cryptographyProvider.encrypt(newPassword);
-            customerToUpdate.setSalt(encryptedNewPassword[0]);
-            customerToUpdate.setPassword(encryptedNewPassword[1]);
+            customerToUpdate.setPassword(encryptedNewPassword[0]);
+            customerToUpdate.setSalt(encryptedNewPassword[1]);
             return customerDao.updateCustomer(customerToUpdate);
         }
         // If Old Password Doesn't match the password in database

@@ -1,4 +1,3 @@
-/*
 package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +7,7 @@ import com.upgrad.FoodOrderingApp.service.business.CategoryService;
 import com.upgrad.FoodOrderingApp.service.business.CustomerService;
 import com.upgrad.FoodOrderingApp.service.business.ItemService;
 import com.upgrad.FoodOrderingApp.service.business.RestaurantService;
+import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static com.upgrad.FoodOrderingApp.service.common.ItemType.NON_VEG;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,28 +61,29 @@ public class RestaurantControllerTest {
     @Test
     public void shouldGetRestaurantDetailsForCorrectRestaurantId() throws Exception {
         final RestaurantEntity restaurantEntity = getRestaurantEntity();
-        when(mockRestaurantService.restaurantByUUID("someRestaurantId"))
+        final String someRestaurantId = restaurantEntity.getUuid().toString();
+        when(mockRestaurantService.restaurantByUUID(someRestaurantId))
                 .thenReturn(restaurantEntity);
 
         final CategoryEntity categoryEntity = getCategoryEntity();
-        when(mockCategoryService.getCategoriesByRestaurant("someRestaurantId"))
+        when(mockCategoryService.getCategoriesByRestaurant(someRestaurantId))
                 .thenReturn(Collections.singletonList(categoryEntity));
 
         final ItemEntity itemEntity = getItemEntity();
-        when(mockItemService.getItemsByCategoryAndRestaurant("someRestaurantId", categoryEntity.getUuid()))
+        when(mockItemService.getItemsByCategoryAndRestaurant(someRestaurantId, categoryEntity.getUuid()))
                 .thenReturn(Collections.singletonList(itemEntity));
 
         mockMvc
-                .perform(get("/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .perform(get("/api/restaurant/" + someRestaurantId).contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").value(restaurantEntity.getUuid()))
                 .andExpect(jsonPath("restaurant_name").value("Famous Restaurant"))
                 .andExpect(jsonPath("customer_rating").value(3.4))
                 .andExpect(jsonPath("number_customers_rated").value(200));
-        verify(mockRestaurantService, times(1)).restaurantByUUID("someRestaurantId");
-        verify(mockCategoryService, times(1)).getCategoriesByRestaurant("someRestaurantId");
+        verify(mockRestaurantService, times(1)).restaurantByUUID(someRestaurantId);
+        verify(mockCategoryService, times(1)).getCategoriesByRestaurant(someRestaurantId);
         verify(mockItemService, times(1))
-                .getItemsByCategoryAndRestaurant("someRestaurantId", categoryEntity.getUuid());
+                .getItemsByCategoryAndRestaurant(someRestaurantId, categoryEntity.getUuid());
     }
 
     //This test case passes when you have handled the exception of trying to fetch any restaurant but your restaurant id
@@ -92,7 +94,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty"));
 
         mockMvc
-                .perform(get("/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .perform(get("/api/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("RNF-002"));
         verify(mockRestaurantService, times(1)).restaurantByUUID(anyString());
@@ -106,7 +108,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-001", "No restaurant by this id"));
 
         mockMvc
-                .perform(get("/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .perform(get("/api/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("RNF-001"));
         verify(mockRestaurantService, times(1)).restaurantByUUID("someRestaurantId");
@@ -266,7 +268,7 @@ public class RestaurantControllerTest {
                 .thenReturn(new RestaurantEntity());
 
         mockMvc
-                .perform(put("/restaurant/" + restaurantId + "?customer_rating=4.5")
+                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isOk())
@@ -285,7 +287,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new AuthorizationFailedException("ATHR-001", "Customer is not Logged in."));
 
         mockMvc
-                .perform(put("/restaurant/someRestaurantId/?customer_rating=4.5")
+                .perform(put("/api/restaurant/someRestaurantId/?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer invalid_auth"))
                 .andExpect(status().isForbidden())
@@ -303,7 +305,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new AuthorizationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint."));
 
         mockMvc
-                .perform(put("/restaurant/someRestaurantId/?customer_rating=4.5")
+                .perform(put("/api/restaurant/someRestaurantId/?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer invalid_auth"))
                 .andExpect(status().isForbidden())
@@ -321,7 +323,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint."));
 
         mockMvc
-                .perform(put("/restaurant/someRestaurantId/?customer_rating=4.5")
+                .perform(put("/api/restaurant/someRestaurantId/?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer invalid_auth"))
                 .andExpect(status().isForbidden())
@@ -342,8 +344,8 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty"));
 
         mockMvc
-                .perform(get("/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .header("authorization", "Bearer database_accesstoken2"))
+                .perform(get("/api/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                        .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("RNF-002"));
         verify(mockCustomerService, times(0)).getCustomer("database_accesstoken2");
@@ -363,7 +365,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-001", "No restaurant by this id"));
 
         mockMvc
-                .perform(put("/restaurant/" + restaurantId + "?customer_rating=4.5")
+                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isNotFound())
@@ -390,7 +392,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new InvalidRatingException("IRE-001", "Rating should be in the range of 1 to 5"));
 
         mockMvc
-                .perform(put("/restaurant/" + restaurantId + "?customer_rating=-5.5")
+                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=-5.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isBadRequest())
@@ -417,7 +419,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new InvalidRatingException("IRE-001", "Rating should be in the range of 1 to 5"));
 
         mockMvc
-                .perform(put("/restaurant/" + restaurantId + "?customer_rating=5.5")
+                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=5.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isBadRequest())
@@ -465,4 +467,4 @@ public class RestaurantControllerTest {
         restaurantEntity.setRestaurantName("Famous Restaurant");
         return restaurantEntity;
     }
-}*/
+}
