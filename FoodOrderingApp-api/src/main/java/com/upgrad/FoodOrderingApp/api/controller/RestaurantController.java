@@ -153,23 +153,19 @@ public class RestaurantController {
         List<RestaurantList> restaurantsList = new ArrayList<RestaurantList>();
 
 
-        // If no records returned from database, just add an empty list in the response
+        // If restaurantEntityList is empty than just return empty array with HTTP status OK
         if (restaurantEntityList == null || restaurantEntityList.isEmpty()) {
-            restaurantsList = new ArrayList<RestaurantList>();
             RestaurantListResponse response = new RestaurantListResponse();
             response.setRestaurants(restaurantsList);
             return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
 
         }
-        // Ierating to list of Restaurant Entity and setting the category value get from data base
-        if (restaurantEntityList != null) {
-            for (RestaurantEntity restaurant : restaurantEntityList) {
-                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
-            }
-        }
 
         for (RestaurantEntity restaurantEntity : restaurantEntityList) {
             RestaurantDetailsResponseAddress responseAddress = new RestaurantDetailsResponseAddress();
+
+            // For each restaurant, retrieve the list of categories
+            restaurantEntity.setCategories(categoryService.getCategoriesByRestaurant(restaurantEntity.getUuid()));
 
             // Frame the address in response
             AddressEntity restaurantAddress = restaurantEntity.getAddress();
