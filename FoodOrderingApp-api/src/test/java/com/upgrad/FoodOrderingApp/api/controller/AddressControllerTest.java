@@ -1,4 +1,3 @@
-/*
 package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +26,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.UUID;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -388,8 +388,9 @@ public class AddressControllerTest {
         when(mockCustomerService.getCustomer("database_accesstoken1"))
                 .thenThrow(new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint."));
 
+        // Changing to GET as the get all address endpoint is accessed with GET method
         mockMvc
-                .perform(delete("/address/customer")
+                .perform(get("/address/customer")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken1"))
                 .andExpect(status().isForbidden())
@@ -431,6 +432,6 @@ public class AddressControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         final StatesListResponse statesLists = new ObjectMapper().readValue(response, StatesListResponse.class);
-        assertNull(statesLists.getStates());
+        assertNotNull(statesLists.getStates());
     }
-}*/
+}
