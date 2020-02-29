@@ -100,7 +100,7 @@ public class RestaurantController {
      * @throws RestaurantNotFoundException If the restaurant id field entered by the customer is empty or
      *                                     If there is no restaurant by the uuid entered by the customer
      */
-    @RequestMapping(method = RequestMethod.GET, path = "restaurant/{restaurant_id}",
+    @RequestMapping(method = RequestMethod.GET, path = "/restaurant/{restaurant_id}",
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<RestaurantDetailsResponse> restaurantByUUID(@PathVariable(name = "restaurant_id", required = false)
                                                                               String restaurantUuid) throws RestaurantNotFoundException {
