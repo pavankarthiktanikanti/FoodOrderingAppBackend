@@ -55,6 +55,11 @@ public class AddressController {
 
         CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
 
+        // Check if state uuid fields is null or empty, if so throw Error message
+        if (FoodOrderingUtil.isInValid(saveAddressRequest.getStateUuid())) {
+            throw new SaveAddressException("SAR-001", "No field can be empty");
+        }
+
         // Check if the state id passed is present State table or not
         StateEntity state = addressService.getStateByUUID(saveAddressRequest.getStateUuid());
 
