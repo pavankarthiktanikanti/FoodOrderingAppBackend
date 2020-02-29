@@ -1,12 +1,14 @@
 package com.upgrad.FoodOrderingApp.service.business;
 
 import com.upgrad.FoodOrderingApp.service.dao.ItemDao;
+import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.ItemNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,5 +44,24 @@ public class ItemService {
      */
     public List<ItemEntity> getItemsByPopularity(RestaurantEntity restaurant) {
         return itemDao.getItemsByPopularity(restaurant.getUuid());
+    }
+
+    /**
+     * This method is used to get List of Item Entities based upon the restaurant uuid and category uuid
+     * This method is used to create Detail Restaurant Response
+     *
+     * @param restaurantUuid restaurant uuid fetched from Restaurant Entity
+     * @param categoryUuid   category uuid fetched from Restaurant Entity
+     * @return List of Item Entity based upon the restaurant uuid and category uuid
+     */
+    public List<ItemEntity> getItemsByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
+        List<CategoryEntity> categoryEntities = itemDao.getItemsByCategoryAndRestaurant(restaurantUuid, categoryUuid);
+        List<ItemEntity> itemEntities = new ArrayList<>();
+        for (CategoryEntity categoryEntity : categoryEntities) {
+            for (int i = 0; i < categoryEntity.getItems().size(); i++) {
+                itemEntities.add(categoryEntity.getItems().get(i));
+            }
+        }
+        return itemEntities;
     }
 }

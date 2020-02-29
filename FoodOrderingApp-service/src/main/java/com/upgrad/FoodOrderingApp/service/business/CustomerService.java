@@ -151,7 +151,6 @@ public class CustomerService {
      * @param customerToUpdate The Customer entity to be updated to Database
      * @return The Updated Customer from Database
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     public CustomerEntity updateCustomer(CustomerEntity customerToUpdate) {
         return customerDao.updateCustomer(customerToUpdate);
     }
@@ -169,7 +168,6 @@ public class CustomerService {
      * @return The Customer Entity after updating the password
      * @throws UpdateCustomerException If the new password is not String and old password doesn't match
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     public CustomerEntity updateCustomerPassword(String oldPassword, String newPassword, CustomerEntity customerToUpdate)
             throws UpdateCustomerException {
         if (!FoodOrderingUtil.isStrongPassword(newPassword)) {
@@ -179,8 +177,8 @@ public class CustomerService {
         // Check if old encrypted password matches with Database records
         if (encryptedPassword.equals(customerToUpdate.getPassword())) {
             final String[] encryptedNewPassword = cryptographyProvider.encrypt(newPassword);
-            customerToUpdate.setSalt(encryptedNewPassword[0]);
-            customerToUpdate.setPassword(encryptedNewPassword[1]);
+            customerToUpdate.setPassword(encryptedNewPassword[0]);
+            customerToUpdate.setSalt(encryptedNewPassword[1]);
             return customerDao.updateCustomer(customerToUpdate);
         }
         // If Old Password Doesn't match the password in database

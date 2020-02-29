@@ -13,7 +13,8 @@ import java.util.List;
 @Table(name = "RESTAURANT")
 @NamedQueries({
         @NamedQuery(name = "restaurantsByRating", query = "select r from RestaurantEntity r order by r.customerRating desc"),
-        @NamedQuery(name = "restaurantByUUID", query = "select r from RestaurantEntity r where r.uuid = :restaurantUUID")
+        @NamedQuery(name = "restaurantByUUID", query = "select r from RestaurantEntity r where r.uuid = :restaurantUUID"),
+        @NamedQuery(name = "restaurantsByName", query = "select r from  RestaurantEntity r where upper(r.restaurantName)  like upper(:likeRestaurantName) order by r.restaurantName asc ")
 })
 public class RestaurantEntity {
 
@@ -47,7 +48,7 @@ public class RestaurantEntity {
     @Column(name = "number_of_customers_rated")
     @NotNull
     @ColumnDefault("0")
-    private Integer numberCustomersRated;
+    private Integer numberCustomersRated = 0;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

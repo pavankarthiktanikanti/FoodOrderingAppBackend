@@ -9,7 +9,9 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "RESTAURANT_CATEGORY")
 @NamedQueries({
-        @NamedQuery(name = "categoriesByRestaurantUUID", query = "select r from RestaurantCategoryEntity r where r.restaurant.uuid = :restaurantUUID order by r.category.categoryName")
+        @NamedQuery(name = "categoriesByRestaurantUUID", query = "select r from RestaurantCategoryEntity r where r.restaurant.uuid = :restaurantUUID order by r.category.categoryName"),
+        @NamedQuery(name = "restaurantsByCategory", query = "select r.restaurant from RestaurantCategoryEntity r where r.category.uuid =:uuid "),
+        @NamedQuery(name = "itemsByCategoryAndRestaurant", query = "select r.category from RestaurantCategoryEntity r where r.category.uuid = :categoryUuid and r.restaurant.uuid = :restaurantUuid")
 })
 public class RestaurantCategoryEntity {
 
