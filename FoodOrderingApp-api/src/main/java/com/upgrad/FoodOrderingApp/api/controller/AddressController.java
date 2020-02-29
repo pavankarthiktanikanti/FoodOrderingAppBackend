@@ -91,11 +91,11 @@ public class AddressController {
     public ResponseEntity<AddressListResponse> getAllAddress(@RequestHeader("authorization") final String authorization)
             throws AuthorizationFailedException {
         CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
-        List<AddressEntity> addresss = addressService.getAllAddress(customer);
+        List<AddressEntity> allAddresses = addressService.getAllAddress(customer);
         List<AddressList> addressLists = new ArrayList<>();
         //Check if any address is returned or not
-        if (addresss != null && !addresss.isEmpty()) {
-            for (AddressEntity address : addresss) {
+        if (allAddresses != null && !allAddresses.isEmpty()) {
+            for (AddressEntity address : allAddresses) {
                 AddressList addressList = new AddressList();
                 AddressListState addressListState = new AddressListState();
                 addressListState.id(UUID.fromString(address.getState().getUuid())).stateName(address.getState().getStateName());
@@ -128,10 +128,7 @@ public class AddressController {
     public ResponseEntity<DeleteAddressResponse> deleteAddress
     (@RequestHeader("authorization") final String authorization, @PathVariable(name = "address_id", required = false) String addressUuid)
             throws AuthorizationFailedException, AddressNotFoundException {
-        //checking if the address uuid is empty
-        if (FoodOrderingUtil.isInValid(addressUuid)) {
-            throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
-        }
+
         CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         //fetching address entity from database according to address Id
         AddressEntity addressToBeDeleted = addressService.getAddressByUUID(addressUuid, loggedCustomer);

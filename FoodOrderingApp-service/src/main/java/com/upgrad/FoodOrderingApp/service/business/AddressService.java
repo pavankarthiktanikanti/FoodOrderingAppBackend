@@ -101,6 +101,10 @@ public class AddressService {
      */
     public AddressEntity getAddressByUUID(String addressUuid, CustomerEntity loggedCustomer) throws AddressNotFoundException, AuthorizationFailedException {
         AddressEntity address = addressDao.getAddressByUUID(addressUuid);
+        //checking if the address uuid is empty
+        if (FoodOrderingUtil.isInValid(addressUuid)) {
+            throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
+        }
         if (address == null) {
             throw new AddressNotFoundException("ANF-003", "No address by this id");
         }
