@@ -3,6 +3,7 @@ package com.upgrad.FoodOrderingApp.service.business;
 import com.upgrad.FoodOrderingApp.service.dao.ItemDao;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
+import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.ItemNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,16 @@ public class ItemService {
     }
 
     /**
+     * Retrieves the popular items from the Database for a particular restaurant
+     *
+     * @param restaurant The restaurant entity for which items has to be pulled
+     * @return The list of popular items
+     */
+    public List<ItemEntity> getItemsByPopularity(RestaurantEntity restaurant) {
+        return itemDao.getItemsByPopularity(restaurant.getUuid());
+    }
+
+    /**
      * This method is used to get List of Item Entities based upon the restaurant uuid and category uuid
      * This method is used to create Detail Restaurant Response
      *
@@ -53,5 +64,4 @@ public class ItemService {
         }
         return itemEntities;
     }
-
 }

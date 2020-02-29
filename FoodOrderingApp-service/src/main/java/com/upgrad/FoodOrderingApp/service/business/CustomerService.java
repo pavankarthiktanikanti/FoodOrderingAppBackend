@@ -38,6 +38,7 @@ public class CustomerService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerEntity saveCustomer(CustomerEntity customer) throws SignUpRestrictedException {
+
         // Check if the email id format is not valid
         if (FoodOrderingUtil.isInValidEmail(customer.getEmail())) {
             throw new SignUpRestrictedException("SGR-002", "Invalid email-id format!");
@@ -58,12 +59,14 @@ public class CustomerService {
             throw new SignUpRestrictedException("SGR-001", "This contact number is already registered! Try other contact number.");
         }
 
+        // Generate random uuid
+        customer.setUuid(UUID.randomUUID().toString());
         // Generate encrypted password and store the Customer details in Database
         String password = customer.getPassword();
         String[] encryptedText = cryptographyProvider.encrypt(password);
         customer.setSalt(encryptedText[0]);
         customer.setPassword(encryptedText[1]);
-        customerDao.saveCustomer(customer);
+        customer = customerDao.saveCustomer(customer);
         return customer;
     }
 

@@ -43,6 +43,7 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<SignupCustomerResponse> signup(@RequestBody final SignupCustomerRequest customerRequest)
             throws SignUpRestrictedException {
+
         // Check if any of the fields are not set, if so throw Error message
         if (FoodOrderingUtil.isInValid(customerRequest.getFirstName())
                 || FoodOrderingUtil.isInValid(customerRequest.getEmailAddress())
@@ -52,12 +53,12 @@ public class CustomerController {
         }
 
         final CustomerEntity customer = new CustomerEntity();
-        customer.setUuid(UUID.randomUUID().toString());
         customer.setFirstName(customerRequest.getFirstName());
         customer.setLastName(customerRequest.getLastName());
         customer.setEmail(customerRequest.getEmailAddress());
         customer.setContactNumber(customerRequest.getContactNumber());
         customer.setPassword(customerRequest.getPassword());
+
         final CustomerEntity createdCustomer = customerService.saveCustomer(customer);
         SignupCustomerResponse signupCustomerResponse = new SignupCustomerResponse();
         signupCustomerResponse.setId(createdCustomer.getUuid());
