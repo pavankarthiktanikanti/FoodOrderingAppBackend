@@ -116,7 +116,7 @@ public class RestaurantService {
             return restaurantDao.updateRestaurantRating(restaurantEntity);
 
         } else {
-            throw new InvalidRatingException("IRE-001", "Restaurant should be in the range of 1 to 5");
+            throw new InvalidRatingException("IRE-001", "Rating should be in the range of 1 to 5");
         }
     }
 

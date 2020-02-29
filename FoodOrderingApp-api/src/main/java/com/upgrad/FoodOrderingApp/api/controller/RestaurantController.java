@@ -50,16 +50,8 @@ public class RestaurantController {
     public ResponseEntity<RestaurantListResponse> getAllRestaurants() {
         // Read restaurants ordered by the ratings of each restaurant
         List<RestaurantEntity> restaurantEntityList = restaurantService.restaurantsByRating();
-        if (restaurantEntityList != null) {
-            // For each restaurant, retrieve the list of categories
-            for (RestaurantEntity restaurant : restaurantEntityList) {
-                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
-            }
-        }
-        List<RestaurantList> restaurantList = populateRestaurantList(restaurantEntityList);
-        RestaurantListResponse response = new RestaurantListResponse();
-        response.setRestaurants(restaurantList);
-        return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
+        //this will generate the ResponseEntity<RestaurantListResponse>
+        return populateRestaurantList(restaurantEntityList);
     }
 
     /**
@@ -75,16 +67,8 @@ public class RestaurantController {
     public ResponseEntity<RestaurantListResponse> restaurantsByName(@PathVariable(name = "restaurant_name", required = false)
                                                                             String restaurantName) throws RestaurantNotFoundException {
         List<RestaurantEntity> restaurantEntityList = restaurantService.restaurantsByName(restaurantName);
-        if (restaurantEntityList != null) {
-            // For each restaurant, retrieve the list of categories
-            for (RestaurantEntity restaurant : restaurantEntityList) {
-                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
-            }
-        }
-        List<RestaurantList> restaurantList = populateRestaurantList(restaurantEntityList);
-        RestaurantListResponse response = new RestaurantListResponse();
-        response.setRestaurants(restaurantList);
-        return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
+        //this will generate the ResponseEntity<RestaurantListResponse>
+        return populateRestaurantList(restaurantEntityList);
     }
 
 
@@ -102,15 +86,8 @@ public class RestaurantController {
     public ResponseEntity<RestaurantListResponse> restaurantByCategory(@PathVariable(name = "category_id", required = false)
                                                                                String categoryId) throws CategoryNotFoundException {
         List<RestaurantEntity> restaurantsListByCategory = restaurantService.restaurantByCategory(categoryId);
-        if (restaurantsListByCategory != null) {
-            for (RestaurantEntity restaurant : restaurantsListByCategory) {
-                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
-            }
-        }
-        List<RestaurantList> restaurantsList = populateRestaurantList(restaurantsListByCategory);
-        RestaurantListResponse response = new RestaurantListResponse();
-        response.setRestaurants(restaurantsList);
-        return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
+        //this will generate the ResponseEntity<RestaurantListResponse>
+        return populateRestaurantList(restaurantsListByCategory);
     }
 
 
@@ -166,18 +143,31 @@ public class RestaurantController {
     }
 
     /**
-     * Populate the list of restaurant responses to be sent for the request from the list of
-     * restaurants retrieved from Database
+     * Populate ResponseEntity of type RestaurantListResponse which consists of restaurant list retrieved from data base
      *
      * @param restaurantEntityList The list of restaurants pulled from Database
-     * @return The restaurant List to be added to the Reponse Entity for the clients
+     * @return Response Entity of type RestaurantListResponse
      */
-    private List<RestaurantList> populateRestaurantList(List<RestaurantEntity> restaurantEntityList) {
+    private ResponseEntity<RestaurantListResponse> populateRestaurantList(List<RestaurantEntity> restaurantEntityList) {
+
+        List<RestaurantList> restaurantsList = new ArrayList<RestaurantList>();
+
+
         // If no records returned from database, just add an empty list in the response
         if (restaurantEntityList == null || restaurantEntityList.isEmpty()) {
-            return new ArrayList<RestaurantList>();
+            restaurantsList = new ArrayList<RestaurantList>();
+            RestaurantListResponse response = new RestaurantListResponse();
+            response.setRestaurants(restaurantsList);
+            return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
+
         }
-        List<RestaurantList> restaurantsList = new ArrayList<RestaurantList>();
+        // Ierating to list of Restaurant Entity and setting the category value get from data base
+        if (restaurantEntityList != null) {
+            for (RestaurantEntity restaurant : restaurantEntityList) {
+                restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
+            }
+        }
+
         for (RestaurantEntity restaurantEntity : restaurantEntityList) {
             RestaurantDetailsResponseAddress responseAddress = new RestaurantDetailsResponseAddress();
 
@@ -209,7 +199,9 @@ public class RestaurantController {
             restaurantList.categories(sb.toString());
             restaurantsList.add(restaurantList);
         }
-        return restaurantsList;
+        RestaurantListResponse response = new RestaurantListResponse();
+        response.setRestaurants(restaurantsList);
+        return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
     }
 
     /**

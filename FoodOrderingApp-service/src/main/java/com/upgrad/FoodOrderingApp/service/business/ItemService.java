@@ -1,5 +1,6 @@
 package com.upgrad.FoodOrderingApp.service.business;
 
+import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.ItemDao;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
@@ -17,6 +18,9 @@ public class ItemService {
 
     @Autowired
     private ItemDao itemDao;
+
+    @Autowired
+    private CategoryDao categoryDao;
 
     /**
      * Retrieves the Item Entity based on the uuid passed
@@ -55,7 +59,7 @@ public class ItemService {
      * @return List of Item Entity based upon the restaurant uuid and category uuid
      */
     public List<ItemEntity> getItemsByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
-        List<CategoryEntity> categoryEntities = itemDao.getItemsByCategoryAndRestaurant(restaurantUuid, categoryUuid);
+        List<CategoryEntity> categoryEntities = categoryDao.getCategoriesByCategoryAndRestaurant(restaurantUuid, categoryUuid);
         List<ItemEntity> itemEntities = new ArrayList<>();
         for (CategoryEntity categoryEntity : categoryEntities) {
             for (int i = 0; i < categoryEntity.getItems().size(); i++) {

@@ -36,4 +36,16 @@ public class CategoryDao {
             return null;
         }
     }
+
+    /**
+     * This method is used to retrieve list of Category Entity based upon the restaurant uuid and category uuid
+     *
+     * @param restaurantUuid restaurant uuid
+     * @param categoryUuid   category uuid
+     * @return List of Category Entities based upon the restaurant uuid and category uuid
+     */
+    public List<CategoryEntity> getCategoriesByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
+        return entityManager.createNamedQuery("categoriesByCategoryAndRestaurant", CategoryEntity.class).
+                setParameter("categoryUuid", categoryUuid).setParameter("restaurantUuid", restaurantUuid).getResultList();
+    }
 }
