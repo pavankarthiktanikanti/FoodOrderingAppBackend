@@ -7,6 +7,7 @@ import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
+import com.upgrad.FoodOrderingApp.service.util.FoodOrderingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,7 +44,7 @@ public class RestaurantService {
      */
     public RestaurantEntity restaurantByUUID(String restaurantUUID) throws RestaurantNotFoundException {
         //if the restaurant uuid passed is null or empty
-        if (restaurantUUID == null || restaurantUUID.isEmpty()) {
+        if (FoodOrderingUtil.isInValid(restaurantUUID)) {
             throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty");
         }
         RestaurantEntity restaurant = restaurantDao.getRestaurantByUUID(restaurantUUID);
@@ -64,7 +65,7 @@ public class RestaurantService {
      */
     public List<RestaurantEntity> restaurantsByName(String restaurantName) throws RestaurantNotFoundException {
         // checks if restaurant name field entered by customer is empty or not
-        if (restaurantName == null || restaurantName.isEmpty()) {
+        if (FoodOrderingUtil.isInValid(restaurantName)) {
             throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
         }
         //here we are concatenating restaurant name passed in request so that it become like %restaurantName%
@@ -84,7 +85,7 @@ public class RestaurantService {
      */
     public List<RestaurantEntity> restaurantByCategory(String uuid) throws CategoryNotFoundException {
         //If the category id field entered by the customer is empty
-        if (uuid == null || uuid.isEmpty()) {
+        if (FoodOrderingUtil.isInValid(uuid)) {
             throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
         }
         CategoryEntity categoryEntity = categoryDao.getCategoryByUUID(uuid);

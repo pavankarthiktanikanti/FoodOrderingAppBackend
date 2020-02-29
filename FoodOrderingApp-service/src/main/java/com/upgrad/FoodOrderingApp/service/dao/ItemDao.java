@@ -51,4 +51,14 @@ public class ItemDao {
         return entityManager.createNamedQuery("itemsByCategoryAndRestaurant", CategoryEntity.class).
                 setParameter("categoryUuid", categoryUuid).setParameter("restaurantUuid", restaurantUuid).getResultList();
     }
+
+    /**
+     * Retrieves the mostly ordered items and top 5 items will be returned
+     *
+     * @param restaurantUUID The uuid of the restaurant for which items has to be retrieved
+     * @return The list of popular items limit to maximum of 5
+     */
+    public List<ItemEntity> getItemsByPopularity(String restaurantUUID) {
+        return entityManager.createNamedQuery("itemsByPopularity", ItemEntity.class).setParameter("restaurantUUID", restaurantUUID).setMaxResults(5).getResultList();
+    }
 }

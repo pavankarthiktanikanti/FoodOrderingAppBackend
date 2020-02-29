@@ -101,13 +101,13 @@ public class RestaurantController {
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<RestaurantListResponse> restaurantByCategory(@PathVariable(name = "category_id", required = false)
                                                                                String categoryId) throws CategoryNotFoundException {
-        List<RestaurantEntity> restaurantsListByUuid = restaurantService.restaurantByCategory(categoryId);
-        if (restaurantsListByUuid != null) {
-            for (RestaurantEntity restaurant : restaurantsListByUuid) {
+        List<RestaurantEntity> restaurantsListByCategory = restaurantService.restaurantByCategory(categoryId);
+        if (restaurantsListByCategory != null) {
+            for (RestaurantEntity restaurant : restaurantsListByCategory) {
                 restaurant.setCategories(categoryService.getCategoriesByRestaurant(restaurant.getUuid()));
             }
         }
-        List<RestaurantList> restaurantsList = populateRestaurantList(restaurantsListByUuid);
+        List<RestaurantList> restaurantsList = populateRestaurantList(restaurantsListByCategory);
         RestaurantListResponse response = new RestaurantListResponse();
         response.setRestaurants(restaurantsList);
         return new ResponseEntity<RestaurantListResponse>(response, HttpStatus.OK);
