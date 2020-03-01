@@ -128,8 +128,9 @@ public class OrderController {
         order.setRestaurant(restaurant);
         order.setBill(saveOrderRequest.getBill() != null ?
                 saveOrderRequest.getBill().doubleValue() : null);
+        // Set discount to 0 in default case
         order.setDiscount(saveOrderRequest.getDiscount() != null ?
-                saveOrderRequest.getDiscount().doubleValue() : null);
+                saveOrderRequest.getDiscount().doubleValue() : 0.0);
         final OrderEntity savedOrder = orderService.saveOrder(order);
 
         List<ItemQuantity> itemQuantities = saveOrderRequest.getItemQuantities();
@@ -174,7 +175,7 @@ public class OrderController {
                 OrderList orderList = new OrderList();
                 // Set the bill details
                 orderList.id(UUID.fromString(pastOrder.getUuid())).bill(BigDecimal.valueOf(pastOrder.getBill()))
-                        .discount(BigDecimal.valueOf(pastOrder.getDiscount())).date(pastOrder.getDate().toString());
+                        .discount(BigDecimal.valueOf(pastOrder.getDiscount() != null ? pastOrder.getDiscount() : 0.0)).date(pastOrder.getDate().toString());
 
                 CouponEntity pastOrderCoupon = pastOrder.getCoupon();
                 // Set the coupon details if any applied while placing the order

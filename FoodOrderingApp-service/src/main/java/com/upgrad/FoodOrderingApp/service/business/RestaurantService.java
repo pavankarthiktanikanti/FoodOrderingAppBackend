@@ -13,10 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 @Service
 public class RestaurantService {
+
+    // For formatting avg rating of restaurant to 2 decimal places
+    public static DecimalFormat df = new DecimalFormat("#.##");
 
     @Autowired
     private RestaurantDao restaurantDao;
@@ -112,6 +116,8 @@ public class RestaurantService {
             int updatedNoOfCustomerRated = noOfCustomerRated + 1;
             // find the new avg rating after rated by customer
             double updatedAvgRating = ((avgRating * noOfCustomerRated) + customerRating) / updatedNoOfCustomerRated;
+            // format rating to 2 decimal places
+            updatedAvgRating = Double.valueOf(df.format(updatedAvgRating));
             restaurantEntity.setCustomerRating(updatedAvgRating);
             restaurantEntity.setNumberCustomersRated(updatedNoOfCustomerRated);
             return restaurantDao.updateRestaurantRating(restaurantEntity);

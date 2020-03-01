@@ -81,7 +81,7 @@ public class CustomerController {
             throws AuthenticationFailedException {
         String[] decodedText = decodeBasicAuthorization(authorization);
         // If the authorization header doesn't have valid format, throw error message
-        if (decodedText == null || decodedText.length < 1) {
+        if (decodedText == null || decodedText.length <= 1) {
             throw new AuthenticationFailedException("ATH-003", "Incorrect format of decoded customer name and password");
         }
         // Authenticate the customer and generate the jwt access token for further access to apis

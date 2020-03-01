@@ -81,8 +81,13 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler(AddressNotFoundException.class)
     public ResponseEntity<ErrorResponse> addressNotFoundException(AddressNotFoundException exception, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        // Set status to BAD_REQUEST if error is due to missing inputs
+        if ("ANF-005".equals(exception.getCode())) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
         return new ResponseEntity<ErrorResponse>(
-                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), httpStatus
         );
     }
 
@@ -126,8 +131,13 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ErrorResponse> categoryNotFoundException(CategoryNotFoundException exception, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        // Set status to BAD_REQUEST if error is due to missing inputs
+        if ("CNF-001".equals(exception.getCode())) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
         return new ResponseEntity<ErrorResponse>(
-                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), httpStatus
         );
     }
 
@@ -156,8 +166,13 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler(RestaurantNotFoundException.class)
     public ResponseEntity<ErrorResponse> restaurantNotFoundException(RestaurantNotFoundException exception, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        // Set status to BAD_REQUEST if error is due to missing inputs
+        if ("RNF-002".equals(exception.getCode()) || "RNF-003".equals(exception.getCode())) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
         return new ResponseEntity<ErrorResponse>(
-                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), HttpStatus.NOT_FOUND
+                new ErrorResponse().code(exception.getCode()).message(exception.getErrorMessage()), httpStatus
         );
     }
 
