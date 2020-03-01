@@ -48,4 +48,24 @@ public class ItemDao {
     public List<ItemEntity> getItemsByPopularity(String restaurantUUID) {
         return entityManager.createNamedQuery("itemsByPopularity", ItemEntity.class).setParameter("restaurantUUID", restaurantUUID).setMaxResults(5).getResultList();
     }
+
+    /**
+     * Retrieves the list of items under a particular restaurant
+     *
+     * @param uuid The uuid of the restaurant for which items has to be retrieved
+     * @return The list of items for a restaurant
+     */
+    public List<ItemEntity> getItemsByRestaurant(String uuid) {
+        return entityManager.createNamedQuery("itemsByRestaurantUUID", ItemEntity.class).setParameter("restaurantUUID", uuid).getResultList();
+    }
+
+    /**
+     * Retrieves the list of items under a particular category
+     *
+     * @param categoryUuid The uuid of the restaurant for which items has to be retrieved
+     * @return The list of items under a category
+     */
+    public List<ItemEntity> getItemsByCategory(String categoryUuid) {
+        return entityManager.createNamedQuery("itemsByCategoryUUID", ItemEntity.class).setParameter("categoryUUID", categoryUuid).getResultList();
+    }
 }

@@ -92,11 +92,11 @@ public class RestaurantController {
 
 
     /**
-     * This method is used find list of  all the restaurants based upon restaurant uuid passed
+     * This method is used to find list of  all the restaurants based upon restaurant uuid passed
      * This method request restaurant uuid from the customer as a path variable
      *
      * @param restaurantUuid The restaurant uuid passed in the path variable
-     * @return Restaurant Detail Response with Http status
+     * @return Restaurant Details with all the items grouped by category
      * @throws RestaurantNotFoundException If the restaurant id field entered by the customer is empty or
      *                                     If there is no restaurant by the uuid entered by the customer
      */
@@ -231,13 +231,13 @@ public class RestaurantController {
 
         // Frame category List Response
         List<CategoryList> categoryListArrayList = new ArrayList<>();
-        for (CategoryEntity restaurantCategory : restaurantCategories) {
+        for (CategoryEntity category : restaurantCategories) {
             // Creating a category list
             CategoryList categoryList = new CategoryList();
             // Frame category list
-            categoryList.id(UUID.fromString(restaurantCategory.getUuid())).categoryName(restaurantCategory.getCategoryName());
+            categoryList.id(UUID.fromString(category.getUuid())).categoryName(category.getCategoryName());
             // Getting List of Item Entities from data base
-            List<ItemEntity> itemEntities = itemService.getItemsByCategoryAndRestaurant(restaurantEntity.getUuid(), restaurantCategory.getUuid());
+            List<ItemEntity> itemEntities = itemService.getItemsByCategoryAndRestaurant(restaurantEntity.getUuid(), category.getUuid());
             // Frame Item list
             List<ItemList> itemListArrayList = new ArrayList<>();
             for (ItemEntity itemEntity : itemEntities) {
