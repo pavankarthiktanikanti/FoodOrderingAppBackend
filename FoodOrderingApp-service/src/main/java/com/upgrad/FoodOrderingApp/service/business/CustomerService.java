@@ -27,7 +27,7 @@ public class CustomerService {
     private PasswordCryptographyProvider cryptographyProvider;
 
     /**
-     * Saved the Signed up Customer details in Database
+     * Saves the Signed up Customer details in Database
      * Validate the Email format, Contact Number format and Password Strength
      * If the contact number entered is already registered, throw error message
      *
@@ -160,14 +160,14 @@ public class CustomerService {
      * Validate the Customer access token and throw error message if the access token is not present
      * in Database or invalid or expired
      * Validate the old password with the one in the Database and update the new encrypted password to Database
-     * Validates if the new password is strong else throw error as Weak password
+     * Validates if the new password is strong, else throw error as Weak password
      * If old password doesn't match with the records throw error as incorrect old password
      *
      * @param oldPassword      The old password of the Customer
      * @param newPassword      The new password to be updated in the Database
      * @param customerToUpdate The Customer Entity to be updated with new password
      * @return The Customer Entity after updating the password
-     * @throws UpdateCustomerException If the new password is not String and old password doesn't match
+     * @throws UpdateCustomerException If the new password is not Strong and old password doesn't match
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerEntity updateCustomerPassword(String oldPassword, String newPassword, CustomerEntity customerToUpdate)
@@ -179,6 +179,7 @@ public class CustomerService {
         // Check if old encrypted password matches with Database records
         if (encryptedPassword.equals(customerToUpdate.getPassword())) {
             final String[] encryptedNewPassword = cryptographyProvider.encrypt(newPassword);
+            // Update the new password and salt in database
             customerToUpdate.setSalt(encryptedNewPassword[0]);
             customerToUpdate.setPassword(encryptedNewPassword[1]);
             return customerDao.updateCustomer(customerToUpdate);
@@ -225,7 +226,7 @@ public class CustomerService {
      * compared to current time
      *
      * @param expiryTime The Expiry time of the token in the Database
-     * @return true if the acess token expiry didn't reach compared with current time
+     * @return true if the access token expiry didn't reach, when compared with current time
      */
     public Boolean isUserSessionValid(ZonedDateTime expiryTime) {
         if (expiryTime != null) {

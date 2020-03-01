@@ -77,7 +77,7 @@ public class RestaurantController {
      * This method requests the category uuid as string from the customer as a path variable
      *
      * @param categoryId The category uuid based upon which restaurants will be fetched from database
-     * @return List all restaurants having same catergory uuid
+     * @return List all restaurants having same category uuid
      * @throws CategoryNotFoundException If the category id field entered by the customer is empty or
      *                                   If there is no category by the uuid entered by the customer
      */
@@ -119,7 +119,7 @@ public class RestaurantController {
      * @param authorization  The Bearer authorization token from the headers
      * @param restaurantUuid The restaurant uuid of the restaurant for which the rating has to be updated
      * @param customerRating The customer rating passed by the customer
-     * @return
+     * @return The uuid of the restaurant which is updated
      * @throws AuthorizationFailedException If the token is invalid or expired or not present in Database
      * @throws RestaurantNotFoundException  If the restaurant id field entered by the customer is empty
      *                                      or If there is no restaurant by the uuid entered by the customer
@@ -152,8 +152,7 @@ public class RestaurantController {
 
         List<RestaurantList> restaurantsList = new ArrayList<RestaurantList>();
 
-
-        // If restaurantEntityList is empty than just return empty array with HTTP status OK
+        // If restaurantEntityList is empty then just return empty array with HTTP status OK
         if (restaurantEntityList == null || restaurantEntityList.isEmpty()) {
             RestaurantListResponse response = new RestaurantListResponse();
             response.setRestaurants(restaurantsList);
@@ -211,11 +210,11 @@ public class RestaurantController {
         AddressEntity restaurantAddress = restaurantEntity.getAddress();
 
         RestaurantDetailsResponseAddress responseAddress = new RestaurantDetailsResponseAddress();
-
+        // Frame the address in response
         responseAddress.id(UUID.fromString(restaurantAddress.getUuid())).flatBuildingName(restaurantAddress.getFlatBuilNo())
                 .locality(restaurantAddress.getLocality()).city(restaurantAddress.getCity()).pincode(restaurantAddress.getPincode());
 
-
+        // Frame the state details in the response
         RestaurantDetailsResponseAddressState state = new RestaurantDetailsResponseAddressState();
         state.id(UUID.fromString(restaurantAddress.getState().getUuid())).stateName(restaurantAddress.getState().getStateName());
         responseAddress.state(state);

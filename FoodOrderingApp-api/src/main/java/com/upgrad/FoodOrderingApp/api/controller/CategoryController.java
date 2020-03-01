@@ -53,11 +53,11 @@ public class CategoryController {
     }
 
     /**
-     * This method retrieves the category will all the items matching that category based on the uuid of category
+     * This method retrieves the category with all the items matching that category based on the uuid of category
      * No authorization required for this endpoint
      *
      * @param categoryUUID The uuid of the category to be retrieved
-     * @return The category will all the items under it
+     * @return The category with all the items under it
      * @throws CategoryNotFoundException If the category uuid is not matched with any of the records in Database
      */
     @RequestMapping(method = RequestMethod.GET,

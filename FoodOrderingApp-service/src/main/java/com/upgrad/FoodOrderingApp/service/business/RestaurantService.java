@@ -61,7 +61,7 @@ public class RestaurantService {
      *
      * @param restaurantName The restaurant name send in the request
      * @return list of Restaurant Entity where the name field entered by the customer is partially matching
-     * @throws RestaurantNotFoundException When the name field entered by cutomer is empty
+     * @throws RestaurantNotFoundException When the name field entered by customer is empty
      */
     public List<RestaurantEntity> restaurantsByName(String restaurantName) throws RestaurantNotFoundException {
         // checks if restaurant name field entered by customer is empty or not
@@ -109,10 +109,11 @@ public class RestaurantService {
         if (customerRating != null && customerRating >= 1 && customerRating <= 5) {
             double avgRating = restaurantEntity.getCustomerRating();
             int noOfCustomerRated = restaurantEntity.getNumberCustomersRated();
-            int updatednoOfCustomerRated = noOfCustomerRated + 1;
-            double updatedAvgRating = ((avgRating * noOfCustomerRated) + customerRating) / updatednoOfCustomerRated;
+            int updatedNoOfCustomerRated = noOfCustomerRated + 1;
+            // find the new avg rating after rated by customer
+            double updatedAvgRating = ((avgRating * noOfCustomerRated) + customerRating) / updatedNoOfCustomerRated;
             restaurantEntity.setCustomerRating(updatedAvgRating);
-            restaurantEntity.setNumberCustomersRated(updatednoOfCustomerRated);
+            restaurantEntity.setNumberCustomersRated(updatedNoOfCustomerRated);
             return restaurantDao.updateRestaurantRating(restaurantEntity);
 
         } else {

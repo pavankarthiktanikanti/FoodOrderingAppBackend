@@ -58,6 +58,7 @@ public class CustomerController {
         customer.setContactNumber(customerRequest.getContactNumber());
         customer.setPassword(customerRequest.getPassword());
 
+        // Save the customer if all input fields has valid data
         final CustomerEntity createdCustomer = customerService.saveCustomer(customer);
         SignupCustomerResponse signupCustomerResponse = new SignupCustomerResponse();
         signupCustomerResponse.setId(createdCustomer.getUuid());
@@ -135,11 +136,13 @@ public class CustomerController {
     public ResponseEntity<UpdateCustomerResponse> updateCustomer(@RequestHeader("authorization") final String authorization,
                                                                  @RequestBody UpdateCustomerRequest updateCustomerRequest)
             throws UpdateCustomerException, AuthorizationFailedException {
+        // Check for mandatory field validation for first name
         if (FoodOrderingUtil.isInValid(updateCustomerRequest.getFirstName())) {
             throw new UpdateCustomerException("UCR-002", "First name field should not be empty");
         }
         CustomerEntity customerToUpdate = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         customerToUpdate.setFirstName(updateCustomerRequest.getFirstName());
+        // last name is optional, have to update only if the request has last name
         if (updateCustomerRequest.getLastName() != null && !updateCustomerRequest.getLastName().isEmpty()) {
             customerToUpdate.setLastName(updateCustomerRequest.getLastName());
         }
@@ -169,6 +172,7 @@ public class CustomerController {
     public ResponseEntity<UpdatePasswordResponse> updateCustomerPassword(@RequestHeader("authorization") final String authorization,
                                                                          @RequestBody UpdatePasswordRequest updatePasswordRequest)
             throws UpdateCustomerException, AuthorizationFailedException {
+        // Check for empty field validation
         if (FoodOrderingUtil.isInValid(updatePasswordRequest.getOldPassword())
                 || FoodOrderingUtil.isInValid(updatePasswordRequest.getNewPassword())) {
             throw new UpdateCustomerException("UCR-003", "No field should be empty");

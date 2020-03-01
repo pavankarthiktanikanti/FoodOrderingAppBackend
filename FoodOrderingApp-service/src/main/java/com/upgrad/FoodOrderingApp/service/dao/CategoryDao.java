@@ -27,7 +27,7 @@ public class CategoryDao {
      * Retrieves the matched Category Record from the Database based on the uuid
      *
      * @param categoryUUID The uuid of the category to be retrieved from Database
-     * @return The category entity will all the item details under it
+     * @return The category entity with all the item details under it
      */
     public CategoryEntity getCategoryByUUID(String categoryUUID) {
         try {

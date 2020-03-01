@@ -66,10 +66,10 @@ public class OrderService {
     }
 
     /**
-     * Saves the order data to database, archives the address
-     * so that the address will be linked to this particular order
-     * when request for delete of address, archived address as it is
-     * linked to the order will not be deleted
+     * Saves the order data to database, archives the address so that the address
+     * will be linked to this particular order
+     * when request for delete of address, archived address will not be deleted as it is
+     * linked to the order
      * Sets the current time as order save date
      *
      * @param order The order Entity to be saved to Database

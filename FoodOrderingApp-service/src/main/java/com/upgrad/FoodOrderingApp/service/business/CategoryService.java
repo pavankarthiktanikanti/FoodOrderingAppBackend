@@ -24,7 +24,7 @@ public class CategoryService {
     /**
      * Retrieves the List of Categories from the Database order by name
      *
-     * @return The list of categories with uui and name of each category
+     * @return The list of categories with uuid and name of each category
      */
     public List<CategoryEntity> getAllCategoriesOrderedByName() {
         return categoryDao.getAllCategoriesOrderedByName();
@@ -52,7 +52,7 @@ public class CategoryService {
      * Throws error message if in case there is no match found with the uuid in Database
      *
      * @param categoryUUID The uuid of the category to be retrieved
-     * @return The Category will all item details under it from the Database
+     * @return The Category with all item details under it from the Database
      * @throws CategoryNotFoundException If the uuid passed is empty or not found in Database
      */
     public CategoryEntity getCategoryById(String categoryUUID) throws CategoryNotFoundException {

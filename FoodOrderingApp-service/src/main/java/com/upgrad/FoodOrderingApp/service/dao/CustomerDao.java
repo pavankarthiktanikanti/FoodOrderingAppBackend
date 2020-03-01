@@ -43,7 +43,7 @@ public class CustomerDao {
     /**
      * Update the Customer Record with the updated first name or last name based on customer request
      *
-     * @param customer The customer details to be updated to Databse
+     * @param customer The customer details to be updated to Database
      * @return the updated Customer Entity
      */
     public CustomerEntity updateCustomer(CustomerEntity customer) {
