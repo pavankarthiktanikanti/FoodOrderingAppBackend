@@ -25,13 +25,13 @@ public class AddressService {
     private AddressDao addressDao;
 
     /**
-     * Saved  Customer address in Database
-     * Validate the Pincode Format and the state uuid with that of state uuid in state table
+     * Save the Customer address in Database
+     * Validate the pin code Format and the state uuid with that of state uuid in state table
      *
      * @param address  The details of address to be saved in Database
      * @param customer The details of customer who has logged in
      * @return Address Entity which is saved in data base
-     * @throws SaveAddressException when pin code is invalid
+     * @throws SaveAddressException when input fields are empty or pin code is invalid
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public AddressEntity saveAddress(AddressEntity address, CustomerEntity customer) throws SaveAddressException {
@@ -43,11 +43,12 @@ public class AddressService {
             throw new SaveAddressException("SAR-001", "No field can be empty");
         }
 
-        // Check if the pincode entered is valid or not
+        // Check if the pin code entered is valid or not
         if (FoodOrderingUtil.isInvalidPinCode(address.getPincode())) {
             throw new SaveAddressException("SAR-002", "Invalid pincode");
         }
         address.setUuid(UUID.randomUUID().toString());
+        // Address is active by default unless any order is placed
         address.setActive(1);
         AddressEntity updatedAddress = addressDao.saveAddress(address);
 
@@ -57,9 +58,9 @@ public class AddressService {
     /**
      * This method will check if there is any entry in the state table with same stateUUID
      *
-     * @param stateUUID state UUID that is passed through Save Address Reques
-     * @return the State Enitity having the same state uuid as passed as parameter
-     * @throws AddressNotFoundException will be thrown when no state is found
+     * @param stateUUID state UUID that is passed through Save Address Request
+     * @return the State Entity matched with the state uuid passed as parameter
+     * @throws AddressNotFoundException when no state is found with the uuid
      */
     public StateEntity getStateByUUID(String stateUUID) throws AddressNotFoundException {
         StateEntity state = addressDao.getStateByStateUUID(stateUUID);
@@ -72,7 +73,7 @@ public class AddressService {
     /**
      * This will save the entry in the customer address table
      *
-     * @param customerAddressEntity will be the customer id and address id
+     * @param customerAddressEntity will be having the customer id and address id
      * @return Customer Address Entity that is saved in data base
      */
     @Transactional(propagation = Propagation.REQUIRED)
@@ -95,12 +96,17 @@ public class AddressService {
      *
      * @param addressUuid    The address Uuid passed as request that needs to be deleted
      * @param loggedCustomer Customer Entity who has logged in
-     * @return Address Entity that needed to be deleted
+     * @return Address Entity that is deleted
      * @throws AddressNotFoundException     If no address is present in db matching address Uuid passed as request
      * @throws AuthorizationFailedException If customer is not the one who has created the address
      */
     public AddressEntity getAddressByUUID(String addressUuid, CustomerEntity loggedCustomer) throws AddressNotFoundException, AuthorizationFailedException {
+        //checking if the address uuid is empty
+        if (FoodOrderingUtil.isInValid(addressUuid)) {
+            throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
+        }
         AddressEntity address = addressDao.getAddressByUUID(addressUuid);
+        // Check if any address matched with the uuid, otherwise throw error
         if (address == null) {
             throw new AddressNotFoundException("ANF-003", "No address by this id");
         }
@@ -118,8 +124,8 @@ public class AddressService {
      * If the value of variable active is 0 or null than the address will be deleted
      * Otherwise the address Entity will be returned as is
      *
-     * @param addressEntity The Address Entity that needed to be deleted or archieved
-     * @return Address Entity that has been deleted or archieved
+     * @param addressEntity The Address Entity that needed to be deleted or archived
+     * @return Address Entity that has been deleted or archived
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public AddressEntity deleteAddress(AddressEntity addressEntity) {

@@ -57,7 +57,7 @@ public class AddressDao {
     /**
      * This will return the saved addresses in descending order of their saved time
      *
-     * @return ist of Address Entity
+     * @return list of Address Entity
      */
     public List<AddressEntity> getAllAddress(CustomerEntity customerEntity) {
         return entityManager.createNamedQuery("allAddressesForCustomer", AddressEntity.class).setParameter("customerId", customerEntity.getId()).getResultList();

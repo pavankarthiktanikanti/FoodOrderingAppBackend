@@ -24,7 +24,7 @@ public class PaymentService {
     }
 
     /**
-     * Retrives the Payment details from the Database based on the uuid
+     * Retrieves the Payment details from the Database based on the uuid
      *
      * @param paymentUUID The uuid of the Payment to lookup in Database
      * @return The Payment Details retrieved from Database with the matched uuid

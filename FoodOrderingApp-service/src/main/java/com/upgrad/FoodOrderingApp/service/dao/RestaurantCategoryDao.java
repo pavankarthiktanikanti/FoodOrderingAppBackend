@@ -17,7 +17,7 @@ public class RestaurantCategoryDao {
      * Queries the Database with the restaurant uuid and returns all the categories related to the restaurant
      *
      * @param restaurantUUID The uuid of the restaurant for which categories has to be retrieved
-     * @return The list of Restaurant Categories matched with the uui of restaurant
+     * @return The list of Restaurant Categories matched with the uuid of restaurant
      */
     public List<RestaurantCategoryEntity> getRestaurantCategoriesByRestaurantUUID(String restaurantUUID) {
         return entityManager.createNamedQuery("categoriesByRestaurantUUID", RestaurantCategoryEntity.class).setParameter("restaurantUUID", restaurantUUID).getResultList();

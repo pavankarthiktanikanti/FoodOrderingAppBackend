@@ -55,6 +55,11 @@ public class AddressController {
 
         CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
 
+        // Check if state uuid fields is null or empty, if so throw Error message
+        if (FoodOrderingUtil.isInValid(saveAddressRequest.getStateUuid())) {
+            throw new SaveAddressException("SAR-001", "No field can be empty");
+        }
+
         // Check if the state id passed is present State table or not
         StateEntity state = addressService.getStateByUUID(saveAddressRequest.getStateUuid());
 
@@ -91,11 +96,11 @@ public class AddressController {
     public ResponseEntity<AddressListResponse> getAllAddress(@RequestHeader("authorization") final String authorization)
             throws AuthorizationFailedException {
         CustomerEntity customer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
-        List<AddressEntity> addresss = addressService.getAllAddress(customer);
+        List<AddressEntity> allAddresses = addressService.getAllAddress(customer);
         List<AddressList> addressLists = new ArrayList<>();
         //Check if any address is returned or not
-        if (addresss != null && !addresss.isEmpty()) {
-            for (AddressEntity address : addresss) {
+        if (allAddresses != null && !allAddresses.isEmpty()) {
+            for (AddressEntity address : allAddresses) {
                 AddressList addressList = new AddressList();
                 AddressListState addressListState = new AddressListState();
                 addressListState.id(UUID.fromString(address.getState().getUuid())).stateName(address.getState().getStateName());
@@ -113,13 +118,13 @@ public class AddressController {
     /**
      * This method is used to delete or archive an Address Entity from data base
      * This will delete or archive the address only if the address Uuid passed in request is present in data base
-     * and the address Uuid requested for deletion is created by logged in User
-     * Also if the value of active fields for Address Entity to be deleted is 0 than it will deleted
-     * otherwise it will be archived
+     * and the address Uuid requested for deletion is the one created by logged in User
+     * Also if the value of active fields for Address Entity to be deleted is 1 then it will deleted
+     * otherwise it will be archived/not deleted
      *
      * @param authorization The Bearer authorization token from the headers
      * @param addressUuid   The address Uuid passed in the request which needed to be deleted
-     * @return DeleteAddressResponse
+     * @return The uuid of the deleted address
      * @throws AuthorizationFailedException If the token is invalid or expired or not present in data base
      * @throws AddressNotFoundException     If the state uuid  is not present in state table
      */
@@ -128,16 +133,14 @@ public class AddressController {
     public ResponseEntity<DeleteAddressResponse> deleteAddress
     (@RequestHeader("authorization") final String authorization, @PathVariable(name = "address_id", required = false) String addressUuid)
             throws AuthorizationFailedException, AddressNotFoundException {
-        //checking if the address uuid is empty
-        if (FoodOrderingUtil.isInValid(addressUuid)) {
-            throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
-        }
+
         CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         //fetching address entity from database according to address Id
         AddressEntity addressToBeDeleted = addressService.getAddressByUUID(addressUuid, loggedCustomer);
-        //checking if the user who has created the address is same as logged in customer
+
         DeleteAddressResponse deleteAddressResponse = new DeleteAddressResponse();
         if (addressToBeDeleted != null) {
+            // Delete the address if found
             AddressEntity deletedAddress = addressService.deleteAddress(addressToBeDeleted);
             deleteAddressResponse.setId(UUID.fromString(deletedAddress.getUuid()));
             deleteAddressResponse.setStatus("ADDRESS DELETED SUCCESSFULLY");
