@@ -77,7 +77,7 @@ public class OrderController {
      * @return The response with the created order uuid and success message
      * @throws AuthorizationFailedException   If the token is invalid or expired or not present in Database
      * @throws CouponNotFoundException        If the Coupon uuid passed doesn't match with Database records
-     * @throws AddressNotFoundException       If the Coupon uuid passed doesn't match with Database records
+     * @throws AddressNotFoundException       If the Address uuid passed doesn't match with Database records
      * @throws PaymentMethodNotFoundException If the Payment uuid passed doesn't match with Database records
      * @throws RestaurantNotFoundException    If the Restaurant uuid passed doesn't match with Database records
      * @throws ItemNotFoundException          If the Items uuid passed doesn't match with Database records
@@ -91,11 +91,12 @@ public class OrderController {
 
         // Validate customer session
         CustomerEntity loggedInCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
-        // Check if the coupon is valid or not, in case it is passed
+
         CouponEntity coupon = null;
         PaymentEntity payment = null;
         AddressEntity address = null;
         RestaurantEntity restaurant = null;
+        // Check if the coupon is valid or not, in case it is passed
         if (saveOrderRequest.getCouponId() != null) {
             coupon = orderService.getCouponByCouponId(saveOrderRequest.getCouponId().toString());
         }

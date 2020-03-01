@@ -118,13 +118,13 @@ public class AddressController {
     /**
      * This method is used to delete or archive an Address Entity from data base
      * This will delete or archive the address only if the address Uuid passed in request is present in data base
-     * and the address Uuid requested for deletion is created by logged in User
-     * Also if the value of active fields for Address Entity to be deleted is 0 than it will deleted
-     * otherwise it will be archived
+     * and the address Uuid requested for deletion is the one created by logged in User
+     * Also if the value of active fields for Address Entity to be deleted is 1 then it will deleted
+     * otherwise it will be archived/not deleted
      *
      * @param authorization The Bearer authorization token from the headers
      * @param addressUuid   The address Uuid passed in the request which needed to be deleted
-     * @return DeleteAddressResponse
+     * @return The uuid of the deleted address
      * @throws AuthorizationFailedException If the token is invalid or expired or not present in data base
      * @throws AddressNotFoundException     If the state uuid  is not present in state table
      */
@@ -137,9 +137,10 @@ public class AddressController {
         CustomerEntity loggedCustomer = customerService.getCustomer(FoodOrderingUtil.decodeBearerToken(authorization));
         //fetching address entity from database according to address Id
         AddressEntity addressToBeDeleted = addressService.getAddressByUUID(addressUuid, loggedCustomer);
-        //checking if the user who has created the address is same as logged in customer
+
         DeleteAddressResponse deleteAddressResponse = new DeleteAddressResponse();
         if (addressToBeDeleted != null) {
+            // Delete the address if found
             AddressEntity deletedAddress = addressService.deleteAddress(addressToBeDeleted);
             deleteAddressResponse.setId(UUID.fromString(deletedAddress.getUuid()));
             deleteAddressResponse.setStatus("ADDRESS DELETED SUCCESSFULLY");

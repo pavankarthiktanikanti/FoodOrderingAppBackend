@@ -41,7 +41,7 @@ public class RestaurantDao {
      * Retrieves the list of all the Restaurants where the name field entered by the customer is partially matching
      * Also the name searched is not be case sensitive
      *
-     * @param likeRestaurantName concatinated restaurant name %restaurantName%
+     * @param likeRestaurantName concatenated restaurant name %restaurantName%
      * @return list of Restaurant Entity where the name field entered by the customer is partially matching
      */
     public List<RestaurantEntity> restaurantsByName(String likeRestaurantName) {
@@ -53,7 +53,7 @@ public class RestaurantDao {
      * This method is used to find the list of restaurants having same category uuid as passed in the request
      *
      * @param uuid The category uuid based upon which restaurants will be fetched from database
-     * @return List of Restaurants
+     * @return List of Restaurants matched with the category uuid
      */
     public List<RestaurantEntity> restaurantByCategory(String uuid) {
         return entityManager.createNamedQuery("restaurantsByCategory", RestaurantEntity.class).
