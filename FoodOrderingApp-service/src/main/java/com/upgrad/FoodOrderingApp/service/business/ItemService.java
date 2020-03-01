@@ -2,7 +2,6 @@ package com.upgrad.FoodOrderingApp.service.business;
 
 import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.ItemDao;
-import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.ItemNotFoundException;
@@ -51,21 +50,31 @@ public class ItemService {
     }
 
     /**
-     * This method is used to get List of Item Entities based upon the restaurant uuid and category uuid
-     * This method is used to create Detail Restaurant Response
+     * This method filters the list of restaurant items based on the category passed
      *
-     * @param restaurantUuid restaurant uuid fetched from Restaurant Entity
-     * @param categoryUuid   category uuid fetched from Restaurant Entity
-     * @return List of Item Entity based upon the restaurant uuid and category uuid
+     * @param restaurantUuid The restaurant uuid for which items has to be retrieved
+     * @param categoryUuid   The category uuid for which items has to be retrieved
+     * @return The list of restaurant items matched with the category
      */
     public List<ItemEntity> getItemsByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
-        List<CategoryEntity> categoryEntities = categoryDao.getCategoriesByCategoryAndRestaurant(restaurantUuid, categoryUuid);
-        List<ItemEntity> itemEntities = new ArrayList<>();
-        for (CategoryEntity categoryEntity : categoryEntities) {
-            for (int i = 0; i < categoryEntity.getItems().size(); i++) {
-                itemEntities.add(categoryEntity.getItems().get(i));
-            }
+        // Get Items based on restaurant uuid
+        List<ItemEntity> itemsOfRestaurant = itemDao.getItemsByRestaurant(restaurantUuid);
+        // Get Items based on category uuid
+        List<ItemEntity> categoryItems = itemDao.getItemsByCategory(categoryUuid);
+        List<ItemEntity> categoryItemsOfRestaurant = new ArrayList<ItemEntity>();
+        if (itemsOfRestaurant != null) {
+            itemsOfRestaurant.forEach(item -> {
+                if (categoryItems != null) {
+                    for (ItemEntity categoryItem : categoryItems) {
+                        // Check if the item belongs to one of the items in this category
+                        if (item.getId() == categoryItem.getId()) {
+                            categoryItemsOfRestaurant.add(item);
+                            break;
+                        }
+                    }
+                }
+            });
         }
-        return itemEntities;
+        return categoryItemsOfRestaurant;
     }
 }

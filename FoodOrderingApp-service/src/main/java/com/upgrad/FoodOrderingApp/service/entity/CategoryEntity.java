@@ -27,7 +27,7 @@ public class CategoryEntity {
     @Size(max = 255)
     private String categoryName;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "CATEGORY_ITEM", joinColumns = {
             @JoinColumn(name = "category_id", nullable = false)},
             inverseJoinColumns = {@JoinColumn(name = "item_id",
